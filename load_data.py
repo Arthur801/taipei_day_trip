@@ -3,11 +3,14 @@ import json
 import mysql.connector
 from mysql.connector import Error
 
-db = mysql.connector.connect(
+try:
+    db = mysql.connector.connect(
             host='localhost',
             user='admin',
             password='Password1234!'
         )
+except Error as e:
+    print(f"database connection error:{e}")
 
 # load raw data from taipei-attractions.json and save to database
 # load raw data form json file
@@ -17,7 +20,7 @@ def load_json():
     return content
 
 # process raw data
-def process_data(content: str):
+def process_data(content: dict):
     attractionList = content["list"]
     return attractionList
 
@@ -38,8 +41,8 @@ def create_database():
                 address TEXT NOT NULL,
                 transport TEXT NOT NULL,
                 mrt TEXT,
-                lat FLOAT NOT NULL,
-                lng FLOAT NOT NULL,
+                lat DECIMAL NOT NULL,
+                lng DECIMAL NOT NULL,
                 images TEXT NOT NULL
             );
             """
@@ -61,12 +64,16 @@ def save_attr_to_db(attrList):
             cursor.execute("INSERT INTO attractions (name, category, description, address, transport, mrt, lat, lng, images) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);", 
                            (name, category, description, address, transport, mrt, lat, lng, images)
                            )
-            db.commit()
+        db.commit()
+    except Error as e:
+        db.rollback()
+        print(f"data insertion error:{e}")
     finally:
         if cursor is not None:
             cursor.close()
 
-create_database()
-content = load_json()
-attrList = process_data(content)
-save_attr_to_db(attrList)
+if __name__ == "__main__":
+    create_database()
+    content = load_json()
+    attrList = process_data(content)
+    save_attr_to_db(attrList)
