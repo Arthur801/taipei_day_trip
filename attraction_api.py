@@ -107,7 +107,7 @@ def get_attractions(
             connection.close()
 
 @router.get(
-        "/api/attractions/{attractionId}",
+        "/api/attraction/{attractionId}",
         responses={
             400: {
                 "model": ErrorResponse,
