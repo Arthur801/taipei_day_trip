@@ -1,3 +1,7 @@
+"""
+load raw data from taipei-attractions.json and save to database
+"""
+
 import json
 
 import mysql.connector
@@ -12,7 +16,6 @@ try:
 except Error as e:
     print(f"database connection error:{e}")
 
-# load raw data from taipei-attractions.json and save to database
 # load raw data form json file
 def load_json():
     with open("./data/taipei-attractions.json") as file:
