@@ -18,7 +18,7 @@ except Error as e:
 
 # load raw data form json file
 def load_json():
-    with open("./data/taipei-attractions.json") as file:
+    with open("./data/taipei-attractions.json", encoding="utf-8") as file:
         content = json.load(file)
     return content
 
