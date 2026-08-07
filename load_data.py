@@ -44,8 +44,8 @@ def create_database():
                 address TEXT NOT NULL,
                 transport TEXT NOT NULL,
                 mrt TEXT,
-                lat DECIMAL NOT NULL,
-                lng DECIMAL NOT NULL,
+                lat DECIMAL(8,6) NOT NULL,
+                lng DECIMAL(9,6) NOT NULL,
                 images TEXT NOT NULL
             );
             """
