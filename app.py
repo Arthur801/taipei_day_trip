@@ -1,6 +1,14 @@
 from fastapi import *
 from fastapi.responses import FileResponse
+
+from attraction_api import router as attraction_router
+from attraction_category_api import router as attraction_category_router
+from mrt_station_api import router as mrt_router
+
 app=FastAPI()
+app.include_router(attraction_router)
+app.include_router(attraction_category_router)
+app.include_router(mrt_router)
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
