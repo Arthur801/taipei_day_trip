@@ -1,108 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Index</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <title>台北一日遊</title>
 </head>
 <body>
-  <nav class="navigation">
-    <div class="navbar">
-      <div class="logo">台北一日遊</div>
-      <ul class="container">
-        <li>
-          <button class="btn-for-navigation">預定行程</button>
-        </li>
-        <li>
-          <button class="btn-for-navigation">登入/註冊</button>
-        </li>
+  <header class="navigation">
+    <nav class="navbar" aria-label="主要導覽">
+      <a class="logo" href="/" aria-label="台北一日遊首頁">台北一日遊</a>
+      <ul class="navigation-links">
+        <li><button class="btn-for-navigation" type="button">預定行程</button></li>
+        <li><button class="btn-for-navigation" type="button">登入／註冊</button></li>
       </ul>
-    </div>
-  </nav>
-  <div class="hero-section">
-    <img src="../images/welcome image.png" alt="welcome image">
-  </div>
-  <div class="hero-content">
-    <div>
-      <div class="slogan">
-        <div class="big-slogan">輕鬆享受台北一日悠閒</div>
-        <div class="small-slogan">探索每個角落，體驗城市的深度旅遊行程</div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-image">
+        <img src="/static/images/welcome image.png" alt="welcome image">
+      </div>
+      
+      <div class="hero-content">
+        <h1 class="big-slogan" id="hero-title">輕鬆享受台北一日悠閒</h1>
+        <p class="small-slogan">探索每個角落，體驗城市的深度旅遊行程</p>
         <div class="search">
-          <div class="search-bar">
-            <form class="Search-bar">
-              <select class="selector">
-                <option>全部分類 ▼</option>
-              </select>
-              <input type="search" id="attraction-search" placeholder="輸入景點名稱查詢">
-              <button class="search-btn" id="attraction-search-btn"><img src="../images/icon_search.png" alt="icon/search"></button>
-            </form>
-            <div class="category-menu">
-
-            </div>
-          </div>
+          <form class="search-bar" role="search">
+            <label class="sr-only" for="attraction-category">景點分類</label>
+            <select class="selector" id="attraction-category" name="category">
+              <option value="">全部分類</option>
+            </select>
+            <label class="sr-only" for="attraction-search">景點名稱</label>
+            <input type="search" id="attraction-search" name="keyword" placeholder="輸入景點名稱查詢">
+            <button class="search-btn" id="attraction-search-btn" type="submit" aria-label="搜尋景點">
+              <img src="/static/images/icon_search.png" alt="">
+            </button>
+          </form>
+          <div class="category-menu" aria-hidden="true"></div>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="attraction-section">
-    <div class="list-bar">
-      <div class="left-container">
-        <button id="button-arrow-left"><img src="../images/Button_Arrow_left.png" alt="button / arrow left"></button>
-      </div>
-      <div class="container">
-        <ul listItem-container>
+    </section>
 
-        </ul>
-      </div>
-      <div class="right-container">
-        <button id="button-arrow-right"><img src="../images/Button_Arrow_right.png" alt="button / arrow right"></button>
-      </div>
-    </div>
-    <div class="attractions">
-      <div class="attractions-group">
-
-      </div>
-    </div>
-  </div>
-  <div class="footer">
-    <div class="footer-text">COPYRIGHT © 2021 台北一日遊</div>
-  </div>
-  <div class="dialog">
-    <div class="dialog-signin">
-      <div class="decorator-bar"></div>
-      <button id="signin-close"><img src="../images/icon_close.png" alt="icon / close"></button>
-    </div>
-    <div class="main">
-      <div class="signin-title">登入會員帳號</div>
-      <div class="container">
-        <input type="email" class="input-for-dialog" id="signin-email" placeholder="輸入電子信箱">
-        <input type="password" class="input-for-dialog" id="signin-password" placeholder="輸入密碼">
-        <div class="button-for-dialog">
-          <button id="signin-button">登入帳戶</button>
+    <section class="attraction-section" aria-label="景點列表">
+      <div class="list-bar" aria-label="捷運站列表">
+        <button class="station-arrow" id="button-arrow-left" type="button" aria-label="顯示前面的捷運站">
+          <img src="/static/images/Button_Arrow_left.png" alt="">
+        </button>
+        <div class="station-list-wrapper">
+          <ul class="listItem-container" aria-live="polite"></ul>
         </div>
-        <a class="signin-signup-text">還沒有帳戶？點此註冊</div>
+        <button class="station-arrow" id="button-arrow-right" type="button" aria-label="顯示後面的捷運站">
+          <img src="/static/images/Button_Arrow_right.png" alt="">
+        </button>
       </div>
-    </div>
+
+      <div class="attractions">
+        <div class="attractions-group" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-text">COPYRIGHT © 2021 台北一日遊</p>
+  </footer>
+
+  <section class="dialog dialog-signin" aria-hidden="true" aria-labelledby="signin-title">
     <div class="backdrop"></div>
-  </div>
-  <div class="dialog">
-    <div class="dialog-signup">
+    <div class="dialog-panel" role="dialog" aria-modal="true">
       <div class="decorator-bar"></div>
-      <button id="signup-close"><img src="../images/icon_close.png" alt="icon / close"></button>
-    </div>
-    <div class="main">
-      <div class="signin-title">註冊會員帳號</div>
-      <div class="container">
-        <input type="text" class="input-for-dialog" id="signup-email" placeholder="輸入姓名">
-        <input type="email" class="input-for-dialog" id="signup-email" placeholder="輸入電子信箱">
-        <input type="password" class="input-for-dialog" id="signup-password" placeholder="輸入密碼">
-        <div class="button-for-dialog">
-          <button id="signin-button">註冊新帳戶</button>
-        </div>
-        <a class="signup-signin-text">已經有帳戶了？點此登入</div>
+      <button class="dialog-close" id="signin-close" type="button" aria-label="關閉登入視窗">
+        <img src="/static/images/icon_close.png" alt="">
+      </button>
+      <div class="dialog-main">
+        <h2 class="signin-title" id="signin-title">登入會員帳號</h2>
+        <form class="dialog-form">
+          <label class="sr-only" for="signin-email">電子信箱</label>
+          <input type="email" class="input-for-dialog" id="signin-email" placeholder="輸入電子信箱">
+          <label class="sr-only" for="signin-password">密碼</label>
+          <input type="password" class="input-for-dialog" id="signin-password" placeholder="輸入密碼">
+          <button class="button-for-dialog" id="signin-button" type="submit">登入帳戶</button>
+        </form>
+        <button class="dialog-switch signin-signup-text" type="button">還沒有帳戶？點此註冊</button>
       </div>
     </div>
+  </section>
+
+  <section class="dialog dialog-signup" aria-hidden="true" aria-labelledby="signup-title">
     <div class="backdrop"></div>
-  </div>
+    <div class="dialog-panel" role="dialog" aria-modal="true">
+      <div class="decorator-bar"></div>
+      <button class="dialog-close" id="signup-close" type="button" aria-label="關閉註冊視窗">
+        <img src="/static/images/icon_close.png" alt="">
+      </button>
+      <div class="dialog-main">
+        <h2 class="signin-title" id="signup-title">註冊會員帳號</h2>
+        <form class="dialog-form">
+          <label class="sr-only" for="signup-name">姓名</label>
+          <input type="text" class="input-for-dialog" id="signup-name" placeholder="輸入姓名">
+          <label class="sr-only" for="signup-email">電子信箱</label>
+          <input type="email" class="input-for-dialog" id="signup-email" placeholder="輸入電子信箱">
+          <label class="sr-only" for="signup-password">密碼</label>
+          <input type="password" class="input-for-dialog" id="signup-password" placeholder="輸入密碼">
+          <button class="button-for-dialog" id="signup-button" type="submit">註冊新帳戶</button>
+        </form>
+        <button class="dialog-switch signup-signin-text" type="button">已經有帳戶了？點此登入</button>
+      </div>
+    </div>
+  </section>
 </body>
 </html>
