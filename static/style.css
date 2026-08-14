@@ -173,13 +173,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .search-btn:hover { background: #337788; }
 .search-btn img { width: 30px; height: 30px; }
 
-.search { position: relative; }
-
 .category-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 2;
+  position: fixed;
+  z-index: 20;
   display: none;
   grid-template-columns: repeat(3, 1fr);
   width: 300px;

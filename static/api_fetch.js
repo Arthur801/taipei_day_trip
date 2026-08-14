@@ -2,9 +2,15 @@ let nextPage = 0;
 let isLoading = false;
 let attractionGroup;
 let moreObserver;
+let loadMoreTrigger;
 let selectedCategory = "";
 let categorySelector;
 let categoryMenu;
+let searchForm;
+let searchInput;
+let activeRequest;
+let resultVersion = 0;
+let currentFilters = { category: "", keyword: "" };
 
 function createAttractionCard(attraction) {
   const card = document.createElement("article");
@@ -39,26 +45,42 @@ async function loadAttractions() {
 
   isLoading = true;
   const page = nextPage;
+  const requestVersion = resultVersion;
+  const parameters = new URLSearchParams({ page });
+  if (currentFilters.category) parameters.set("category", currentFilters.category);
+  if (currentFilters.keyword) parameters.set("keyword", currentFilters.keyword);
+
+  const controller = new AbortController();
+  activeRequest = controller;
 
   try {
-    const response = await fetch(`/api/attractions?page=${page}`);
+    const response = await fetch(`/api/attractions?${parameters}`, { signal: controller.signal });
     if (!response.ok) throw new Error(`Unable to load attractions: ${response.status}`);
 
     const { data, nextPage: returnedNextPage } = await response.json();
+    if (requestVersion !== resultVersion) return;
+
     attractionGroup.append(...data.map(createAttractionCard));
     nextPage = returnedNextPage;
     if (nextPage === null && moreObserver) moreObserver.disconnect();
   } catch (error) {
-    console.error("Unable to load attractions.", error);
+    if (error.name !== "AbortError") console.error("Unable to load attractions.", error);
   } finally {
-    isLoading = false;
+    if (requestVersion === resultVersion) {
+      isLoading = false;
+      if (activeRequest === controller) activeRequest = null;
+    }
   }
 }
 
 function observeMoreAttractions() {
-  const loadMoreTrigger = document.createElement("div");
-  loadMoreTrigger.setAttribute("aria-hidden", "true");
-  attractionGroup.after(loadMoreTrigger);
+  if (moreObserver) moreObserver.disconnect();
+
+  if (!loadMoreTrigger) {
+    loadMoreTrigger = document.createElement("div");
+    loadMoreTrigger.setAttribute("aria-hidden", "true");
+    attractionGroup.after(loadMoreTrigger);
+  }
 
   moreObserver = new IntersectionObserver((entries) => {
     if (entries.some((entry) => entry.isIntersecting)) loadAttractions();
@@ -70,6 +92,12 @@ function closeCategoryMenu() {
   categoryMenu.classList.remove("is-open");
   categoryMenu.setAttribute("aria-hidden", "true");
   categorySelector.setAttribute("aria-expanded", "false");
+}
+
+function positionCategoryMenu() {
+  const selectorPosition = categorySelector.getBoundingClientRect();
+  categoryMenu.style.top = `${selectorPosition.bottom + 4}px`;
+  categoryMenu.style.left = `${selectorPosition.left}px`;
 }
 
 function selectCategory(category) {
@@ -109,8 +137,11 @@ function initializeCategoryMenu() {
   categoryMenu = document.querySelector("#category-menu");
   if (!categorySelector || !categoryMenu) return;
 
+  document.body.append(categoryMenu);
+
   categorySelector.addEventListener("click", () => {
     const isOpen = categoryMenu.classList.toggle("is-open");
+    if (isOpen) positionCategoryMenu();
     categoryMenu.setAttribute("aria-hidden", String(!isOpen));
     categorySelector.setAttribute("aria-expanded", String(isOpen));
   });
@@ -121,7 +152,44 @@ function initializeCategoryMenu() {
     }
   });
 
+  window.addEventListener("resize", () => {
+    if (categoryMenu.classList.contains("is-open")) positionCategoryMenu();
+  });
+  window.addEventListener("scroll", closeCategoryMenu, { passive: true });
+
   loadCategories();
+}
+
+function resetAttractions() {
+  resultVersion += 1;
+  activeRequest?.abort();
+  activeRequest = null;
+  isLoading = false;
+  nextPage = 0;
+  moreObserver?.disconnect();
+  moreObserver = null;
+  attractionGroup.replaceChildren();
+}
+
+async function searchAttractions(event) {
+  event.preventDefault();
+  currentFilters = {
+    category: selectedCategory,
+    keyword: searchInput.value.trim(),
+  };
+  resetAttractions();
+  const searchVersion = resultVersion;
+
+  await loadAttractions();
+  if (searchVersion === resultVersion && nextPage !== null) observeMoreAttractions();
+}
+
+function initializeSearch() {
+  searchForm = document.querySelector(".search-bar");
+  searchInput = document.querySelector("#attraction-search");
+  if (!searchForm || !searchInput) return;
+
+  searchForm.addEventListener("submit", searchAttractions);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -129,6 +197,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!attractionGroup) return;
 
   initializeCategoryMenu();
+  initializeSearch();
+  const initialVersion = resultVersion;
   await loadAttractions();
-  if (nextPage !== null) observeMoreAttractions();
+  if (initialVersion === resultVersion && nextPage !== null) observeMoreAttractions();
 });
