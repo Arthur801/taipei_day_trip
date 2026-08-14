@@ -173,7 +173,33 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .search-btn:hover { background: #337788; }
 .search-btn img { width: 30px; height: 30px; }
 
-.category-menu { position: relative; z-index: 2; }
+.search { position: relative; }
+
+.category-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 2;
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  width: 300px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.category-menu.is-open { display: grid; }
+
+.category-option {
+  padding: 8px 10px;
+  color: var(--dark-text);
+  background: transparent;
+  border: 0;
+  text-align: left;
+}
+
+.category-option:hover { color: var(--teal); background: var(--light-gray); }
 
 .attraction-section {
   width: min(1200px, calc(100% - 40px));

@@ -28,17 +28,15 @@
         <p class="small-slogan">探索每個角落，體驗城市的深度旅遊行程</p>
         <div class="search">
           <form class="search-bar" role="search">
-            <label class="sr-only" for="attraction-category">景點分類</label>
-            <select class="selector" id="attraction-category" name="category">
-              <option value="">全部分類</option>
-            </select>
+            <span class="sr-only" id="attraction-category-label">景點分類</span>
+            <button class="selector" id="attraction-category" type="button" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="attraction-category-label attraction-category">全部分類</button>
             <label class="sr-only" for="attraction-search">景點名稱</label>
             <input type="search" id="attraction-search" name="keyword" placeholder="輸入景點名稱查詢">
             <button class="search-btn" id="attraction-search-btn" type="submit" aria-label="搜尋景點">
               <img src="/static/images/icon_search.png" alt="">
             </button>
           </form>
-          <div class="category-menu" aria-hidden="true"></div>
+          <div class="category-menu" id="category-menu" role="listbox" aria-hidden="true"></div>
         </div>
       </div>
     </section>
