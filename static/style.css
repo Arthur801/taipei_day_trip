@@ -2,10 +2,10 @@
   --teal: #448899;
   --text: #666666;
   --dark-text: #333333;
-  --light-gray: #f8f8f8;
+  --light-gray: #eeeeee;
   --border: #e8e8e8;
   --footer: #757575;
-  font-family: Arial, "Noto Sans TC", sans-serif;
+  font-family: "Noto Sans TC", Arial, sans-serif;
   color: var(--text);
 }
 
@@ -38,7 +38,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   border: 0;
 }
 
-.navigation { height: 54px; background: #fff; }
+.navigation {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 54px;
+  background: #fff;
+}
 
 .navbar {
   display: flex;
@@ -46,6 +52,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   justify-content: space-between;
   width: min(1200px, calc(100% - 40px));
   height: 100%;
+  padding: 0 10px;
   margin: 0 auto;
 }
 
@@ -53,7 +60,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   color: var(--teal);
   font-size: 30px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 34px;
   text-decoration: none;
 }
 
@@ -102,7 +109,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   position: relative;
   z-index: 1;
   width: min(1200px, calc(100% - 40px));
-  padding-top: 80px;
+  padding: 88px 10px 0;
   margin: 0 auto;
   color: #fff;
 }
@@ -129,13 +136,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .selector {
   width: 100px;
   flex: 0 0 100px;
-  padding: 0 8px;
+  padding: 0 25px 0 10px;
   color: var(--dark-text);
   background: var(--light-gray);
   border: 0;
   border-right: 1px solid #ececec;
   font-weight: 700;
-  appearance: auto;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #000 50%), linear-gradient(135deg, #000 50%, transparent 50%);
+  background-position: calc(100% - 13px) 20px, calc(100% - 8px) 20px;
+  background-repeat: no-repeat;
+  background-size: 5px 5px;
 }
 
 #attraction-search {
@@ -170,7 +181,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   padding: 40px 0;
 }
 
-.list-bar { display: flex; align-items: center; gap: 10px; min-height: 30px; }
+.list-bar { display: flex; align-items: center; gap: 10px; min-height: 50px; }
 
 .station-arrow {
   display: grid;
@@ -206,7 +217,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .listItem-container button { padding: 3px 0; background: transparent; border: 0; }
 .listItem-container button:hover { color: var(--teal); }
 
-.attractions { margin-top: 30px; }
+.attractions { margin-top: 20px; padding: 15px; }
 
 .attractions-group {
   display: grid;
@@ -230,7 +241,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .attraction-card img, .attractions-group > article > img, .attractions-group > a > img {
   display: block;
   width: 100%;
-  aspect-ratio: 1.5 / 1;
+  height: 197px;
   object-fit: cover;
 }
 
@@ -289,40 +300,37 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .dialog-close { position: absolute; top: 18px; right: 12px; width: 24px; height: 24px; padding: 0; background: transparent; border: 0; }
 .dialog-close img { display: block; width: 100%; height: 100%; }
 .dialog-main { padding: 18px 15px 16px; text-align: center; }
-.signin-title { margin: 0 0 15px; color: var(--dark-text); font-size: 24px; }
+.signin-title { margin: 0 0 15px; color: var(--dark-text); font-size: 24px; line-height: 24px; }
 .dialog-form { display: grid; gap: 10px; }
 .input-for-dialog { width: 100%; height: 47px; padding: 0 15px; color: var(--dark-text); border: 1px solid #cccccc; border-radius: 5px; }
-.button-for-dialog { height: 47px; color: #fff; background: var(--teal); border: 0; border-radius: 5px; }
+.button-for-dialog { height: 47px; color: #fff; background: var(--teal); border: 0; border-radius: 5px; font-size: 19px; }
 .button-for-dialog:hover { background: #337788; }
 .dialog-switch { padding: 12px 0 0; color: var(--text); background: transparent; border: 0; }
 .dialog-switch:hover { color: var(--teal); }
 
-@media (min-width: 1921px) {
-  .hero-image {
-    width: 100vw;
-    height: auto;
+@media (max-width: 1200px) {
+  .attractions-group {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
 }
 
-@media (max-width: 700px) {
-  .navbar, .hero-content, .attraction-section { width: calc(100% - 20px); }
-  .navbar { width: calc(100% - 20px); }
-  .logo { font-size: 28px; }
+@media (max-width: 600px) {
+  .navbar { width: calc(100% - 20px); padding: 0; }
   .navigation-links { gap: 10px; }
-  .btn-for-navigation { font-size: 14px; }
   .hero-image { width: 1280px; height: 320px; }
-  .hero-content { padding-top: 80px; }
+  .hero-content, .attraction-section { width: 100%; }
+  .hero-content { padding: 88px 20px 0; }
   .big-slogan { font-size: 28px; }
   .small-slogan { margin-bottom: 18px; }
   .search-bar { width: 100%; }
-  .selector { width: 95px; flex-basis: 95px; font-size: 14px; }
+  .selector { width: 100px; flex-basis: 100px; }
   .search-btn { width: 60px; flex-basis: 60px; }
-  .attraction-section { padding: 20px 0 40px; }
   .list-bar { gap: 0; }
   .station-list-wrapper { overflow-x: auto; scrollbar-width: none; }
   .station-list-wrapper::-webkit-scrollbar { display: none; }
   .listItem-container { gap: 20px; padding: 0 8px; }
   .attractions { margin-top: 20px; }
   .attractions-group { grid-template-columns: 1fr; gap: 15px; }
+  .attraction-card img, .attractions-group > article > img, .attractions-group > a > img { height: 235px; }
   .footer { min-height: 104px; }
 }
