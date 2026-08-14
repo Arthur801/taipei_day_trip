@@ -11,6 +11,10 @@ let searchInput;
 let activeRequest;
 let resultVersion = 0;
 let currentFilters = { category: "", keyword: "" };
+let stationList;
+let stationListWrapper;
+let leftStationArrow;
+let rightStationArrow;
 
 function createAttractionCard(attraction) {
   const card = document.createElement("article");
@@ -171,8 +175,7 @@ function resetAttractions() {
   attractionGroup.replaceChildren();
 }
 
-async function searchAttractions(event) {
-  event.preventDefault();
+async function applyAttractionFilters() {
   currentFilters = {
     category: selectedCategory,
     keyword: searchInput.value.trim(),
@@ -184,6 +187,11 @@ async function searchAttractions(event) {
   if (searchVersion === resultVersion && nextPage !== null) observeMoreAttractions();
 }
 
+function searchAttractions(event) {
+  event.preventDefault();
+  applyAttractionFilters();
+}
+
 function initializeSearch() {
   searchForm = document.querySelector(".search-bar");
   searchInput = document.querySelector("#attraction-search");
@@ -192,12 +200,57 @@ function initializeSearch() {
   searchForm.addEventListener("submit", searchAttractions);
 }
 
+function createMrtStationItem(stationName) {
+  const item = document.createElement("li");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = stationName;
+  button.addEventListener("click", () => {
+    searchInput.value = stationName;
+    applyAttractionFilters();
+  });
+  item.append(button);
+  return item;
+}
+
+async function loadMrtStations() {
+  try {
+    const response = await fetch("/api/mrts");
+    if (!response.ok) throw new Error(`Unable to load MRT stations: ${response.status}`);
+
+    const { data } = await response.json();
+    stationList.replaceChildren(...data.map(createMrtStationItem));
+  } catch (error) {
+    console.error("Unable to load MRT stations.", error);
+  }
+}
+
+function scrollMrtStations(direction) {
+  stationListWrapper.scrollBy({
+    left: stationListWrapper.clientWidth * direction,
+    behavior: "smooth",
+  });
+}
+
+function initializeMrtStations() {
+  stationList = document.querySelector(".listItem-container");
+  stationListWrapper = document.querySelector(".station-list-wrapper");
+  leftStationArrow = document.querySelector("#button-arrow-left");
+  rightStationArrow = document.querySelector("#button-arrow-right");
+  if (!stationList || !stationListWrapper || !leftStationArrow || !rightStationArrow) return;
+
+  leftStationArrow.addEventListener("click", () => scrollMrtStations(-1));
+  rightStationArrow.addEventListener("click", () => scrollMrtStations(1));
+  loadMrtStations();
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   attractionGroup = document.querySelector(".attractions-group");
   if (!attractionGroup) return;
 
   initializeCategoryMenu();
   initializeSearch();
+  initializeMrtStations();
   const initialVersion = resultVersion;
   await loadAttractions();
   if (initialVersion === resultVersion && nextPage !== null) observeMoreAttractions();
