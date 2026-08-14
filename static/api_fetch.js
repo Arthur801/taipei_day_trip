@@ -1,3 +1,8 @@
+let nextPage = 0;
+let isLoading = false;
+let attractionGroup;
+let moreObserver;
+
 function createAttractionCard(attraction) {
   const card = document.createElement("article");
   card.className = "attraction-card";
@@ -27,18 +32,41 @@ function createAttractionCard(attraction) {
 }
 
 async function loadAttractions() {
-  const attractionGroup = document.querySelector(".attractions-group");
-  if (!attractionGroup) return;
+  if (isLoading || nextPage === null) return;
+
+  isLoading = true;
+  const page = nextPage;
 
   try {
-    const response = await fetch("/api/attractions?page=0");
+    const response = await fetch(`/api/attractions?page=${page}`);
     if (!response.ok) throw new Error(`Unable to load attractions: ${response.status}`);
 
-    const { data } = await response.json();
-    attractionGroup.replaceChildren(...data.map(createAttractionCard));
+    const { data, nextPage: returnedNextPage } = await response.json();
+    attractionGroup.append(...data.map(createAttractionCard));
+    nextPage = returnedNextPage;
+    if (nextPage === null && moreObserver) moreObserver.disconnect();
   } catch (error) {
     console.error("Unable to load attractions.", error);
+  } finally {
+    isLoading = false;
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadAttractions);
+function observeMoreAttractions() {
+  const loadMoreTrigger = document.createElement("div");
+  loadMoreTrigger.setAttribute("aria-hidden", "true");
+  attractionGroup.after(loadMoreTrigger);
+
+  moreObserver = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) loadAttractions();
+  });
+  moreObserver.observe(loadMoreTrigger);
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  attractionGroup = document.querySelector(".attractions-group");
+  if (!attractionGroup) return;
+
+  await loadAttractions();
+  if (nextPage !== null) observeMoreAttractions();
+});
