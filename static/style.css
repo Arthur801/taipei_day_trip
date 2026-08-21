@@ -330,6 +330,42 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .dialog-switch { padding: 12px 0 0; color: var(--text); background: transparent; border: 0; }
 .dialog-switch:hover { color: var(--teal); }
 
+/* Attraction detail page: its API client fills the marked containers in attraction.html. */
+.attraction-page { width: min(1200px, calc(100% - 40px)); margin: 0 auto; padding: 40px 10px 60px; }
+.attraction-hero { display: grid; grid-template-columns: 540px minmax(0, 1fr); gap: 30px; padding: 0 5px 40px; border-bottom: 1px solid var(--border); }
+.attraction-gallery { position: relative; min-height: 400px; overflow: hidden; background: #f0f0f0; border-radius: 5px; }
+.attraction-gallery-image { display: block; width: 100%; height: 400px; object-fit: cover; }
+.gallery-control { position: absolute; top: 50%; z-index: 1; width: 36px; height: 36px; padding: 0; background: rgb(255 255 255 / 70%); border: 0; border-radius: 50%; transform: translateY(-50%); }
+.gallery-control:hover { background: #fff; }
+.gallery-control img { display: block; width: 100%; height: 100%; }
+.gallery-control-previous { left: 10px; }
+.gallery-control-next { right: 10px; }
+.gallery-indicators { position: absolute; right: 0; bottom: 12px; left: 0; display: flex; justify-content: center; gap: 10px; }
+.gallery-indicator { width: 10px; height: 10px; padding: 0; background: #fff; border: 1px solid #fff; border-radius: 50%; box-shadow: 0 0 2px rgb(0 0 0 / 40%); }
+.gallery-indicator.is-active { background: #000; }
+.attraction-overview { min-width: 0; }
+.attraction-title { margin: 0; color: var(--dark-text); font-size: 24px; line-height: 1.4; }
+.attraction-subtitle { min-height: 24px; margin: 8px 0 20px; font-size: 16px; }
+.attraction-subtitle span:not(:empty) + span:not(:empty)::before { content: " at "; }
+.booking-panel { min-height: 302px; padding: 15px 20px 20px; background: var(--light-gray); border-radius: 5px; }
+.booking-panel h2 { margin: 0 0 15px; color: var(--text); font-size: 16px; }
+.booking-description { margin: 0 0 15px; font-size: 16px; }
+.booking-row { display: flex; align-items: center; min-height: 34px; margin: 0 0 6px; font-size: 16px; }
+.booking-row > label, .booking-time legend, .booking-price strong { flex: 0 0 auto; margin-right: 10px; font-weight: 700; }
+#booking-date { width: 194px; height: 35px; padding: 0 10px; color: #000; background: #fff; border: 0; font-size: 16px; }
+.booking-time { padding: 0; border: 0; }
+.booking-time legend { padding: 0; }
+.booking-time label { display: inline-flex; align-items: center; margin-right: 18px; }
+.booking-time input { width: 20px; height: 20px; margin: 0 7px 0 0; accent-color: var(--teal); }
+.booking-price { display: block; min-height: auto; }
+.booking-button { margin-top: 14px; padding: 6px 15px; color: #fff; background: var(--teal); border: 0; border-radius: 5px; font-size: 18px; }
+.booking-button:hover { background: #337788; }
+.attraction-details { padding: 45px 10px 0; font-size: 16px; }
+.attraction-description { min-height: 24px; margin: 0 0 26px; white-space: pre-line; }
+.attraction-contact { margin-top: 22px; }
+.attraction-contact h2 { margin: 0 0 4px; color: var(--text); font-size: 16px; }
+.attraction-contact p { margin: 0; white-space: pre-line; }
+
 @media (max-width: 1200px) {
   .attractions-group {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -355,4 +391,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .attractions-group { grid-template-columns: 1fr; gap: 15px; }
   .attraction-card img, .attractions-group > article > img, .attractions-group > a > img { height: 235px; }
   .footer { min-height: 104px; }
+  .attraction-page { width: 100%; padding: 0 0 40px; }
+  .attraction-hero { display: block; padding: 0 0 40px; border-bottom: 1px solid var(--border); }
+  .attraction-gallery { min-height: 350px; border-radius: 0; }
+  .attraction-gallery-image { height: 350px; }
+  .attraction-overview { padding: 24px 10px 0; }
+  .attraction-subtitle { margin-bottom: 20px; }
+  .booking-panel { min-height: 300px; padding: 20px; }
+  .booking-description { margin-bottom: 16px; line-height: 1.5; }
+  .booking-row { margin-bottom: 8px; }
+  .booking-time label { margin-right: 14px; }
+  .booking-button { margin-top: 12px; }
+  .attraction-details { padding: 45px 20px 0; }
+  .attraction-description { margin-bottom: 28px; line-height: 1.55; }
+  .attraction-contact { margin-top: 28px; line-height: 1.55; }
 }
