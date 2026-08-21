@@ -46,6 +46,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   background: #fff;
 }
 
+.attraction-page-body .navigation { border-bottom: 1px solid var(--border); }
+
 .navbar {
   display: flex;
   align-items: center;
@@ -352,10 +354,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .booking-panel h2 { margin: 0 0 15px; color: var(--text); font-size: 16px; }
 .booking-description { margin: 0 0 15px; font-size: 16px; }
 .booking-row { display: flex; align-items: center; min-height: 34px; margin: 0 0 6px; font-size: 16px; }
-.booking-row > label, .booking-time legend, .booking-price strong { flex: 0 0 auto; margin-right: 10px; font-weight: 700; }
+.booking-row > label, .booking-time-label, .booking-price strong { flex: 0 0 auto; margin-right: 10px; font-weight: 700; }
 #booking-date { width: 194px; height: 35px; padding: 0 10px; color: #000; background: #fff; border: 0; font-size: 16px; }
-.booking-time { padding: 0; border: 0; }
-.booking-time legend { padding: 0; }
+.booking-time { align-items: flex-end; }
+.booking-time-label { line-height: 20px; }
 .booking-time label { display: inline-flex; align-items: center; margin-right: 18px; }
 .booking-time input { width: 20px; height: 20px; margin: 0 7px 0 0; accent-color: var(--teal); }
 .booking-price { display: block; min-height: auto; }

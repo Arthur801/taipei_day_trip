@@ -35,11 +35,11 @@
           <h2 id="booking-title">訂購導覽行程</h2>
           <p class="booking-description">以此景點為中心的一日行程，帶您探索城市角落故事</p>
           <div class="booking-row"><label for="booking-date">選擇日期：</label><input id="booking-date" name="date" type="date" aria-label="選擇日期"></div>
-          <fieldset class="booking-row booking-time">
-            <legend>選擇時間：</legend>
+          <div class="booking-row booking-time" role="radiogroup" aria-label="選擇時間">
+            <span class="booking-time-label">選擇時間：</span>
             <label><input type="radio" name="booking-time" value="morning" checked><span>上半天</span></label>
             <label><input type="radio" name="booking-time" value="afternoon"><span>下半天</span></label>
-          </fieldset>
+          </div>
           <p class="booking-row booking-price"><strong>導覽費用：</strong>新台幣 2000 元</p>
           <button class="booking-button" id="booking-button" type="button">開始預約行程</button>
         </section>
