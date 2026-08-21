@@ -333,16 +333,16 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 /* Attraction detail page: its API client fills the marked containers in attraction.html. */
 .attraction-page { width: min(1200px, calc(100% - 40px)); margin: 0 auto; padding: 40px 10px 60px; }
 .attraction-hero { display: grid; grid-template-columns: 540px minmax(0, 1fr); gap: 30px; padding: 0 5px 40px; border-bottom: 1px solid var(--border); }
-.attraction-gallery { position: relative; min-height: 400px; overflow: hidden; background: #f0f0f0; border-radius: 5px; }
-.attraction-gallery-image { display: block; width: 100%; height: 400px; object-fit: cover; }
-.gallery-control { position: absolute; top: 50%; z-index: 1; width: 36px; height: 36px; padding: 0; background: rgb(255 255 255 / 70%); border: 0; border-radius: 50%; transform: translateY(-50%); }
+.attraction-gallery { position: relative; min-height: 404px; overflow: visible; background: #f0f0f0; }
+.attraction-gallery-image { display: block; width: 100%; height: 400px; object-fit: cover; border-radius: 5px; }
+.gallery-control { position: absolute; top: 50%; z-index: 1; width: 36px; height: 36px; padding: 0; opacity: .75; background: rgb(255 255 255 / 70%); border: 0; border-radius: 50%; transform: translateY(-50%); }
 .gallery-control:hover { background: #fff; }
 .gallery-control[hidden] { display: none; }
 .gallery-control img { display: block; width: 100%; height: 100%; }
 .gallery-control-previous { left: 10px; }
 .gallery-control-next { right: 10px; }
-.gallery-indicators { position: absolute; right: 0; bottom: 12px; left: 0; display: flex; justify-content: center; gap: 10px; }
-.gallery-indicator { width: 10px; height: 10px; padding: 0; background: #fff; border: 1px solid #fff; border-radius: 50%; box-shadow: 0 0 2px rgb(0 0 0 / 40%); }
+.gallery-indicators { position: absolute; top: 400px; right: 0; left: 0; display: flex; height: 4px; }
+.gallery-indicator { min-width: 0; flex: 1 1 0; height: 4px; padding: 0; background: rgb(255 255 255 / 70%); border: 0; border-radius: 0; box-shadow: none; }
 .gallery-indicator.is-active { background: #000; }
 .attraction-overview { min-width: 0; }
 .attraction-title { margin: 0; color: var(--dark-text); font-size: 24px; line-height: 1.4; }
@@ -373,6 +373,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   }
 }
 
+@media (min-width: 601px) and (max-width: 1200px) {
+  .attraction-hero { grid-template-columns: minmax(0, 9fr) minmax(0, 10fr); }
+  .attraction-gallery { min-height: 0; aspect-ratio: 135 / 101; }
+  .attraction-gallery-image { position: absolute; top: 0; left: 0; height: calc(100% - 4px); }
+  .gallery-indicators { top: calc(100% - 4px); }
+  .gallery-control { top: calc(50% - 2px); width: clamp(24px, 3vw, 36px); height: clamp(24px, 3vw, 36px); }
+  .booking-panel { min-height: 302px; }
+}
+
 @media (max-width: 600px) {
   .navbar { width: calc(100% - 20px); padding: 0; }
   .navigation-links { gap: 10px; }
@@ -392,10 +401,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .attractions-group { grid-template-columns: 1fr; gap: 15px; }
   .attraction-card img, .attractions-group > article > img, .attractions-group > a > img { height: 235px; }
   .footer { min-height: 104px; }
+}
+
+@media (max-width: 749px) {
   .attraction-page { width: 100%; padding: 0 0 40px; }
   .attraction-hero { display: block; padding: 0 0 40px; border-bottom: 1px solid var(--border); }
-  .attraction-gallery { min-height: 350px; border-radius: 0; }
-  .attraction-gallery-image { height: 350px; }
+  .attraction-gallery { min-height: 354px; aspect-ratio: auto; }
+  .attraction-gallery-image { position: static; height: 350px; border-radius: 0; }
+  .gallery-indicators { top: 350px; }
   .attraction-overview { padding: 24px 10px 0; }
   .attraction-subtitle { margin-bottom: 20px; }
   .booking-panel { min-height: 300px; padding: 20px; }
