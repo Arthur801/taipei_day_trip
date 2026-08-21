@@ -361,11 +361,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .booking-price { display: block; min-height: auto; }
 .booking-button { margin-top: 14px; padding: 6px 15px; color: #fff; background: var(--teal); border: 0; border-radius: 5px; font-size: 18px; }
 .booking-button:hover { background: #337788; }
-.attraction-details { padding: 45px 10px 0; font-size: 16px; }
-.attraction-description { min-height: 24px; margin: 0 0 26px; white-space: pre-line; }
+.attraction-details { padding: 45px 10px 0; font-size: 16px; line-height: 1.5; }
+.attraction-description { min-height: 24px; margin: 0 0 26px; }
 .attraction-contact { margin-top: 22px; }
 .attraction-contact h2 { margin: 0 0 4px; color: var(--text); font-size: 16px; }
-.attraction-contact p { margin: 0; white-space: pre-line; }
+.attraction-contact p { margin: 0; }
+.attraction-text-line { display: block; }
+.attraction-text-line + .attraction-text-line { margin-top: 1.5em; }
 
 @media (max-width: 1200px) {
   .attractions-group {
@@ -417,6 +419,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .booking-time label { margin-right: 14px; }
   .booking-button { margin-top: 12px; }
   .attraction-details { padding: 45px 20px 0; }
-  .attraction-description { margin-bottom: 28px; line-height: 1.55; }
-  .attraction-contact { margin-top: 28px; line-height: 1.55; }
+  .attraction-description { margin-bottom: 28px; }
+  .attraction-contact { margin-top: 28px; }
 }

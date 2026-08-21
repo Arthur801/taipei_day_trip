@@ -10,6 +10,28 @@ function getImageUrl(imagePath) {
   return imagePath.startsWith("http") ? imagePath : `${RESOURCE_ORIGIN}${imagePath}`;
 }
 
+function formatAttractionText(text) {
+  return String(text || "")
+    .replace(/。\s*/g, "。\n")
+    .replace(/\s*([•●▪◦‧・])/g, "\n$1")
+    .trim();
+}
+
+function renderFormattedText(element, text) {
+  const lines = formatAttractionText(text).split(/\n+/).filter(Boolean);
+  if (lines.length < 2) {
+    element.textContent = lines[0] || "";
+    return;
+  }
+
+  element.replaceChildren(...lines.map((line) => {
+    const textLine = document.createElement("span");
+    textLine.className = "attraction-text-line";
+    textLine.textContent = line;
+    return textLine;
+  }));
+}
+
 function renderGallery(images, attractionName) {
   const gallery = document.querySelector("#attraction-images");
   const previousButton = document.querySelector("#previous-image");
@@ -61,9 +83,9 @@ function renderAttraction(attraction) {
   document.querySelector("#attraction-name").textContent = attraction.name || "";
   document.querySelector("#attraction-category").textContent = attraction.category || "";
   document.querySelector("#attraction-mrt").textContent = attraction.mrt || "";
-  document.querySelector("#attraction-description").textContent = attraction.description || "";
-  document.querySelector("#attraction-address").textContent = attraction.address || "";
-  document.querySelector("#attraction-transport").textContent = attraction.transport || "";
+  renderFormattedText(document.querySelector("#attraction-description"), attraction.description);
+  renderFormattedText(document.querySelector("#attraction-address"), attraction.address);
+  renderFormattedText(document.querySelector("#attraction-transport"), attraction.transport);
   document.title = attraction.name ? `台北一日遊｜${attraction.name}` : "台北一日遊｜景點";
   renderGallery(Array.isArray(attraction.images) ? attraction.images : [], attraction.name || "景點圖片");
 }
