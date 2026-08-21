@@ -68,6 +68,23 @@ function renderAttraction(attraction) {
   renderGallery(Array.isArray(attraction.images) ? attraction.images : [], attraction.name || "景點圖片");
 }
 
+function initializeBookingTime() {
+  const timeOptions = document.querySelectorAll('input[name="booking-time"]');
+  const price = document.querySelector(".booking-price");
+  if (!price || timeOptions.length === 0) return;
+
+  function updatePrice() {
+    const selectedTime = document.querySelector('input[name="booking-time"]:checked');
+    const amount = selectedTime?.value === "afternoon" ? 2500 : 2000;
+    const label = document.createElement("strong");
+    label.textContent = "導覽費用：";
+    price.replaceChildren(label, `新台幣 ${amount} 元`);
+  }
+
+  timeOptions.forEach((option) => option.addEventListener("change", updatePrice));
+  updatePrice();
+}
+
 async function loadAttraction() {
   const attractionId = getAttractionId();
   if (!attractionId) {
@@ -86,4 +103,7 @@ async function loadAttraction() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadAttraction);
+document.addEventListener("DOMContentLoaded", () => {
+  initializeBookingTime();
+  loadAttraction();
+});
