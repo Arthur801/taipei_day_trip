@@ -17,8 +17,10 @@ let leftStationArrow;
 let rightStationArrow;
 
 function createAttractionCard(attraction) {
-  const card = document.createElement("article");
+  const card = document.createElement("a");
   card.className = "attraction-card";
+  card.href = `/attraction/${attraction.id}`;
+  card.setAttribute("aria-label", `查看${attraction.name}的景點詳情`);
 
   const image = document.createElement("img");
   image.src = attraction.images[0]
