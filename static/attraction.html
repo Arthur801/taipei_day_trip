@@ -1,11 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attraction</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <title>台北一日遊｜景點</title>
 </head>
-<body>
-  
+<body class="attraction-page-body">
+  <header class="navigation">
+    <nav class="navbar" aria-label="主要導覽">
+      <a class="logo" href="/" aria-label="台北一日遊首頁">台北一日遊</a>
+      <ul class="navigation-links">
+        <li><button class="btn-for-navigation" type="button">預定行程</button></li>
+        <li><button class="btn-for-navigation" type="button">登入／註冊</button></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="attraction-page" aria-live="polite">
+    <section class="attraction-hero" aria-label="景點資訊">
+      <div class="attraction-gallery" id="attraction-images" aria-label="景點圖片輪播">
+        <!-- 後續 JavaScript 依 API 的 images 陣列加入 .attraction-gallery-image 圖片。 -->
+        <button class="gallery-control gallery-control-previous" id="previous-image" type="button" aria-label="上一張圖片"><img src="/static/images/Button_Arrow_left.png" alt=""></button>
+        <button class="gallery-control gallery-control-next" id="next-image" type="button" aria-label="下一張圖片"><img src="/static/images/Button_Arrow_right.png" alt=""></button>
+        <div class="gallery-indicators" id="image-indicators" aria-label="圖片頁數"></div>
+      </div>
+
+      <div class="attraction-overview">
+        <div class="attraction-summary" id="attraction-summary">
+          <!-- 後續 JavaScript 依 API 加入景點名稱、分類與捷運站。 -->
+          <h1 class="attraction-title" id="attraction-name"></h1>
+          <p class="attraction-subtitle"><span id="attraction-category"></span><span id="attraction-mrt"></span></p>
+        </div>
+        <section class="booking-panel" aria-labelledby="booking-title">
+          <h2 id="booking-title">訂購導覽行程</h2>
+          <p class="booking-description">以此景點為中心的一日行程，帶您探索城市角落故事</p>
+          <div class="booking-row"><label for="booking-date">選擇日期：</label><input id="booking-date" name="date" type="date" aria-label="選擇日期"></div>
+          <div class="booking-row booking-time" role="radiogroup" aria-label="選擇時間">
+            <span class="booking-time-label">選擇時間：</span>
+            <label><input type="radio" name="booking-time" value="morning" checked><span>上半天</span></label>
+            <label><input type="radio" name="booking-time" value="afternoon"><span>下半天</span></label>
+          </div>
+          <p class="booking-row booking-price"><strong>導覽費用：</strong>新台幣 2000 元</p>
+          <button class="booking-button" id="booking-button" type="button">開始預約行程</button>
+        </section>
+      </div>
+    </section>
+
+    <section class="attraction-details" id="attraction-details" aria-label="景點詳細資訊">
+      <!-- 後續 JavaScript 依 API 加入 description、address 與 transport。 -->
+      <p class="attraction-description" id="attraction-description"></p>
+      <div class="attraction-contact"><h2>景點地址：</h2><p id="attraction-address"></p></div>
+      <div class="attraction-contact"><h2>交通方式：</h2><p id="attraction-transport"></p></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-text">COPYRIGHT © 2021 台北一日遊</p>
+  </footer>
+  <script src="/static/api_fetch_attraction.js" defer></script>
 </body>
 </html>
