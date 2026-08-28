@@ -13,6 +13,60 @@ function initializeUserDialog() {
   ) return;
 
   const dialogs = [signinDialog, signupDialog];
+  let currentUser = null;
+
+  function getStoredToken() {
+    try {
+      return localStorage.getItem("token");
+    } catch (error) {
+      console.error("Unable to read authentication token.", error);
+      return null;
+    }
+  }
+
+  function removeStoredToken() {
+    try {
+      localStorage.removeItem("token");
+    } catch (error) {
+      console.error("Unable to remove authentication token.", error);
+    }
+  }
+
+  function renderUserStatus(user) {
+    currentUser = user;
+    window.currentUser = user;
+    memberButton.textContent = user ? "登出系統" : "登入／註冊";
+
+    if (user) {
+      memberButton.removeAttribute("aria-haspopup");
+      memberButton.setAttribute("aria-label", "登出目前帳號");
+    } else {
+      memberButton.setAttribute("aria-haspopup", "dialog");
+      memberButton.removeAttribute("aria-label");
+    }
+  }
+
+  async function checkUserSignInStatus() {
+    const token = getStoredToken();
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    memberButton.disabled = true;
+
+    try {
+      const response = await fetch("/api/user/auth", { headers });
+      if (!response.ok) throw new Error(`Unable to check user status: ${response.status}`);
+
+      const { data } = await response.json();
+      if (data === null) removeStoredToken();
+      renderUserStatus(data);
+      return data !== null;
+    } catch (error) {
+      console.error("Unable to check user status.", error);
+      renderUserStatus(null);
+      return false;
+    } finally {
+      memberButton.disabled = false;
+    }
+  }
 
   function setMessage(element, message = "", isSuccess = false) {
     element.textContent = message;
@@ -54,6 +108,12 @@ function initializeUserDialog() {
   }
 
   memberButton.addEventListener("click", () => {
+    if (currentUser) {
+      removeStoredToken();
+      window.location.reload();
+      return;
+    }
+
     openDialog(signinDialog, signinForm.elements.email);
   });
 
@@ -101,8 +161,7 @@ function initializeUserDialog() {
         return;
       }
 
-      signinForm.reset();
-      closeDialogs();
+      window.location.reload();
     } catch (error) {
       console.error("Unable to sign in.", error);
       setMessage(signinMessage, "連線失敗，請稍後再試");
@@ -138,6 +197,8 @@ function initializeUserDialog() {
       submitButton.disabled = false;
     }
   });
+
+  checkUserSignInStatus();
 }
 
 document.addEventListener("DOMContentLoaded", initializeUserDialog);
