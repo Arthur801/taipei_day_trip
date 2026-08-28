@@ -43,8 +43,8 @@ function initializeUserDialog() {
     firstInput.focus();
   }
 
-  async function submitUserRequest(method, body) {
-    const response = await fetch("/api/user", {
+  async function submitUserRequest(endpoint, method, body) {
+    const response = await fetch(endpoint, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -83,7 +83,7 @@ function initializeUserDialog() {
     submitButton.disabled = true;
 
     try {
-      const { response, data } = await submitUserRequest("PUT", {
+      const { response, data } = await submitUserRequest("/api/user/auth", "PUT", {
         email: signinForm.elements.email.value.trim(),
         password: signinForm.elements.password.value,
       });
@@ -118,7 +118,7 @@ function initializeUserDialog() {
     submitButton.disabled = true;
 
     try {
-      const { response, data } = await submitUserRequest("POST", {
+      const { response, data } = await submitUserRequest("/api/user", "POST", {
         name: signupForm.elements.name.value.trim(),
         email: signupForm.elements.email.value.trim(),
         password: signupForm.elements.password.value,
