@@ -50,6 +50,16 @@ def create_database():
             );
             """
         )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL UNIQUE,
+                password VARCHAR(255) NOT NULL
+            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+            """
+                )
     except Error as e:
         print(f"database creation error: {e}")
     finally:
