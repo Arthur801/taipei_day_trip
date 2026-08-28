@@ -12,7 +12,7 @@
       <a class="logo" href="/" aria-label="台北一日遊首頁">台北一日遊</a>
       <ul class="navigation-links">
         <li><button class="btn-for-navigation" type="button">預定行程</button></li>
-        <li><button class="btn-for-navigation" type="button">登入／註冊</button></li>
+        <li><button class="btn-for-navigation" id="member-button" type="button" aria-haspopup="dialog">登入／註冊</button></li>
       </ul>
     </nav>
   </header>
@@ -73,13 +73,14 @@
       </button>
       <div class="dialog-main">
         <h2 class="signin-title" id="signin-title">登入會員帳號</h2>
-        <form class="dialog-form">
+        <form class="dialog-form" id="signin-form">
           <label class="sr-only" for="signin-email">電子信箱</label>
-          <input type="email" class="input-for-dialog" id="signin-email" placeholder="輸入電子信箱">
+          <input type="email" class="input-for-dialog" id="signin-email" name="email" placeholder="輸入電子信箱" autocomplete="email" required>
           <label class="sr-only" for="signin-password">密碼</label>
-          <input type="password" class="input-for-dialog" id="signin-password" placeholder="輸入密碼">
+          <input type="password" class="input-for-dialog" id="signin-password" name="password" placeholder="輸入密碼" autocomplete="current-password" required>
           <button class="button-for-dialog" id="signin-button" type="submit">登入帳戶</button>
         </form>
+        <p class="dialog-message" id="signin-message" aria-live="polite" hidden></p>
         <button class="dialog-switch signin-signup-text" type="button">還沒有帳戶？點此註冊</button>
       </div>
     </div>
@@ -94,19 +95,21 @@
       </button>
       <div class="dialog-main">
         <h2 class="signin-title" id="signup-title">註冊會員帳號</h2>
-        <form class="dialog-form">
+        <form class="dialog-form" id="signup-form">
           <label class="sr-only" for="signup-name">姓名</label>
-          <input type="text" class="input-for-dialog" id="signup-name" placeholder="輸入姓名">
+          <input type="text" class="input-for-dialog" id="signup-name" name="name" placeholder="輸入姓名" autocomplete="name" required>
           <label class="sr-only" for="signup-email">電子信箱</label>
-          <input type="email" class="input-for-dialog" id="signup-email" placeholder="輸入電子信箱">
+          <input type="email" class="input-for-dialog" id="signup-email" name="email" placeholder="輸入電子信箱" autocomplete="email" required>
           <label class="sr-only" for="signup-password">密碼</label>
-          <input type="password" class="input-for-dialog" id="signup-password" placeholder="輸入密碼">
+          <input type="password" class="input-for-dialog" id="signup-password" name="password" placeholder="輸入密碼" autocomplete="new-password" required>
           <button class="button-for-dialog" id="signup-button" type="submit">註冊新帳戶</button>
         </form>
+        <p class="dialog-message" id="signup-message" aria-live="polite" hidden></p>
         <button class="dialog-switch signup-signin-text" type="button">已經有帳戶了？點此登入</button>
       </div>
     </div>
   </section>
   <script src="/static/api_fetch.js" defer></script>
+  <script src="/static/user_auth.js" defer></script>
 </body>
 </html>
