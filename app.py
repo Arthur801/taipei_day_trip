@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from attraction_api import router as attraction_router
 from attraction_category_api import router as attraction_category_router
+from booking_api import router as booking_router
 from mrt_station_api import router as mrt_router
 from user_api import router as user_router
 
@@ -12,6 +13,7 @@ app.include_router(attraction_router)
 app.include_router(attraction_category_router)
 app.include_router(mrt_router)
 app.include_router(user_router)
+app.include_router(booking_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Static Pages (Never Modify Code in this Block)
