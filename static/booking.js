@@ -15,6 +15,46 @@ function removeStoredToken() {
   }
 }
 
+function clearDialogMessage(dialog) {
+  const message = dialog.querySelector(".dialog-message");
+  if (!message) return;
+
+  message.textContent = "";
+  message.hidden = true;
+  message.classList.remove("is-success");
+}
+
+function openSigninDialog() {
+  const signinDialog = document.querySelector(".dialog-signin");
+  const signupDialog = document.querySelector(".dialog-signup");
+  if (!signinDialog) return;
+
+  if (signupDialog) {
+    signupDialog.classList.remove("is-open");
+    signupDialog.setAttribute("aria-hidden", "true");
+  }
+
+  clearDialogMessage(signinDialog);
+  signinDialog.classList.add("is-open");
+  signinDialog.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  signinDialog.querySelector("input")?.focus();
+}
+
+async function getSignedInUser(token) {
+  const response = await fetch("/api/user/auth", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (response.status === 403) return null;
+  if (!response.ok) {
+    throw new Error(`Unable to check user status: ${response.status}`);
+  }
+
+  const { data } = await response.json();
+  return data;
+}
+
 async function guardBookingPage() {
   if (!document.body.classList.contains("booking-page-body")) return;
 
@@ -41,33 +81,10 @@ async function guardBookingPage() {
 function initializeBookingNavigation() {
   const bookingButton = document.querySelector("#booking-nav-button");
   const signinDialog = document.querySelector(".dialog-signin");
-  const signupDialog = document.querySelector(".dialog-signup");
 
   if (!bookingButton || !signinDialog) return;
 
   let isCheckingUser = false;
-
-  function clearDialogMessage(dialog) {
-    const message = dialog.querySelector(".dialog-message");
-    if (!message) return;
-
-    message.textContent = "";
-    message.hidden = true;
-    message.classList.remove("is-success");
-  }
-
-  function openSigninDialog() {
-    if (signupDialog) {
-      signupDialog.classList.remove("is-open");
-      signupDialog.setAttribute("aria-hidden", "true");
-    }
-
-    clearDialogMessage(signinDialog);
-    signinDialog.classList.add("is-open");
-    signinDialog.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-    signinDialog.querySelector("input")?.focus();
-  }
 
   bookingButton.addEventListener("click", async () => {
     if (isCheckingUser) return;
@@ -82,22 +99,8 @@ function initializeBookingNavigation() {
     bookingButton.disabled = true;
 
     try {
-      const response = await fetch("/api/user/auth", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.status === 403) {
-        removeStoredToken();
-        openSigninDialog();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`Unable to check user status: ${response.status}`);
-      }
-
-      const { data } = await response.json();
-      if (data) {
+      const user = await getSignedInUser(token);
+      if (user) {
         window.location.assign("/booking");
         return;
       }
@@ -114,7 +117,92 @@ function initializeBookingNavigation() {
   });
 }
 
+function getBookingAttractionId() {
+  const match = window.location.pathname.match(/^\/attraction\/([1-9]\d*)\/?$/);
+  return match ? Number(match[1]) : null;
+}
+
+function initializeAttractionBooking() {
+  const submitButton = document.querySelector("#booking-button");
+  const dateInput = document.querySelector("#booking-date");
+  if (!submitButton || !dateInput) return;
+
+  let isCreatingBooking = false;
+
+  dateInput.addEventListener("input", () => dateInput.setCustomValidity(""));
+
+  submitButton.addEventListener("click", async () => {
+    if (isCreatingBooking) return;
+
+    const token = getStoredToken();
+    if (!token) {
+      openSigninDialog();
+      return;
+    }
+
+    isCreatingBooking = true;
+    submitButton.disabled = true;
+
+    try {
+      const user = await getSignedInUser(token);
+      if (!user) {
+        removeStoredToken();
+        openSigninDialog();
+        return;
+      }
+
+      if (!dateInput.value) {
+        dateInput.setCustomValidity("請選擇日期");
+        dateInput.reportValidity();
+        return;
+      }
+
+      const attractionId = getBookingAttractionId();
+      const selectedTime = document.querySelector('input[name="booking-time"]:checked');
+      if (!attractionId || !selectedTime) {
+        throw new Error("Unable to read booking details from the attraction page.");
+      }
+
+      const time = selectedTime.value;
+      const price = time === "afternoon" ? 2500 : 2000;
+      const response = await fetch("/api/booking", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          attractionId,
+          date: dateInput.value,
+          time,
+          price,
+        }),
+      });
+
+      if (response.status === 403) {
+        removeStoredToken();
+        openSigninDialog();
+        return;
+      }
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || `Unable to create booking: ${response.status}`);
+      }
+
+      window.location.assign("/booking");
+    } catch (error) {
+      console.error("Unable to create booking.", error);
+      window.alert("預定行程失敗，請稍後再試");
+    } finally {
+      isCreatingBooking = false;
+      submitButton.disabled = false;
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initializeBookingNavigation();
+  initializeAttractionBooking();
   guardBookingPage();
 });
