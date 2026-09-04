@@ -60,6 +60,20 @@ def create_database():
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
             """
                 )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS booking (
+                id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                date DATE NOT NULL,
+                user_id INT UNSIGNED NOT NULL,
+                time ENUM('morning', 'afternoon') NOT NULL,
+                price INT UNSIGNED NOT NULL,
+                attraction_id INT UNSIGNED NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (attraction_id) REFERENCES attractions(id)
+            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+            """
+        )
     except Error as e:
         print(f"database creation error: {e}")
     finally:

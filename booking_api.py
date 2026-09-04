@@ -35,7 +35,7 @@ class ErrorResponse(BaseModel):
             }
         },
         )
-def get_unconfirmed_booking():
+def get_booking():
     pass
 
 
