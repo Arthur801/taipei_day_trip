@@ -42,8 +42,9 @@ function openSigninDialog() {
 }
 
 async function getSignedInUser(token) {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const response = await fetch("/api/user/auth", {
-    headers: { Authorization: `Bearer ${token}` },
+    headers,
   });
 
   if (response.status === 403) return null;
@@ -55,14 +56,124 @@ async function getSignedInUser(token) {
   return data;
 }
 
-async function guardBookingPage() {
+function renderBookingUser(user) {
+  const memberName = document.querySelector("#booking-member-name");
+  const contactName = document.querySelector("#contact-name");
+  const contactEmail = document.querySelector("#contact-email");
+
+  if (memberName) memberName.textContent = user.name;
+  if (contactName) contactName.value = user.name;
+  if (contactEmail) contactEmail.value = user.email;
+}
+
+function renderEmptyBooking() {
+  const emptyMessage = document.querySelector("#booking-empty");
+  const bookingContent = document.querySelector("#booking-content");
+
+  document.body.classList.remove("has-booking");
+  if (emptyMessage) {
+    emptyMessage.textContent = "目前沒有任何待預訂的行程";
+    emptyMessage.hidden = false;
+  }
+  if (bookingContent) bookingContent.hidden = true;
+}
+
+function getBookingImageUrl(imagePath) {
+  if (!imagePath) return "";
+  if (imagePath.startsWith("http")) return imagePath;
+  return `https://padax.github.io/taipei-day-trip-resources${imagePath}`;
+}
+
+function renderBooking(booking) {
+  const emptyMessage = document.querySelector("#booking-empty");
+  const bookingContent = document.querySelector("#booking-content");
+  const image = document.querySelector("#booking-attraction-image");
+  const attractionName = document.querySelector("#booking-attraction-name");
+  const date = document.querySelector("#booking-date-display");
+  const time = document.querySelector("#booking-time-display");
+  const price = document.querySelector("#booking-price-display");
+  const address = document.querySelector("#booking-address");
+  const totalPrice = document.querySelector("#booking-total-price");
+  const attraction = booking.attraction;
+
+  if (!bookingContent || !attraction) {
+    throw new Error("Booking API returned incomplete data.");
+  }
+
+  document.body.classList.add("has-booking");
+  if (emptyMessage) emptyMessage.hidden = true;
+  bookingContent.hidden = false;
+
+  if (image) {
+    const imageUrl = getBookingImageUrl(attraction.image);
+    if (imageUrl) image.src = imageUrl;
+    else image.removeAttribute("src");
+    image.alt = attraction.name || "預定景點";
+  }
+  if (attractionName) attractionName.textContent = attraction.name || "";
+  if (date) date.textContent = booking.date || "";
+  if (time) {
+    time.textContent = booking.time === "afternoon"
+      ? "下午 2 點到晚上 9 點"
+      : "早上 9 點到下午 4 點";
+  }
+  if (price) price.textContent = booking.price;
+  if (address) address.textContent = attraction.address || "";
+  if (totalPrice) totalPrice.textContent = booking.price;
+}
+
+function initializeDeleteBooking(token) {
+  const deleteButton = document.querySelector("#booking-delete");
+  if (!deleteButton) return;
+
+  deleteButton.addEventListener("click", async () => {
+    if (deleteButton.disabled) return;
+    deleteButton.disabled = true;
+
+    try {
+      const response = await fetch("/api/booking", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 403) {
+        removeStoredToken();
+        window.location.replace("/");
+        return;
+      }
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || `Unable to delete booking: ${response.status}`);
+      }
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Unable to delete booking.", error);
+      window.alert("刪除預定行程失敗，請稍後再試");
+      deleteButton.disabled = false;
+    }
+  });
+}
+
+async function initializeBookingPage() {
   if (!document.body.classList.contains("booking-page-body")) return;
 
   const token = getStoredToken();
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const response = await fetch("/api/booking", { headers });
+    const user = await getSignedInUser(token);
+    if (!user) {
+      removeStoredToken();
+      window.location.replace("/");
+      return;
+    }
+
+    renderBookingUser(user);
+
+    const response = await fetch("/api/booking", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (response.status === 403) {
       removeStoredToken();
@@ -73,8 +184,17 @@ async function guardBookingPage() {
     if (!response.ok) {
       throw new Error(`Unable to load booking: ${response.status}`);
     }
+
+    const { data } = await response.json();
+    if (data === null) {
+      renderEmptyBooking();
+      return;
+    }
+
+    renderBooking(data);
+    initializeDeleteBooking(token);
   } catch (error) {
-    console.error("Unable to verify booking page access.", error);
+    console.error("Unable to initialize booking page.", error);
   }
 }
 
@@ -204,5 +324,5 @@ function initializeAttractionBooking() {
 document.addEventListener("DOMContentLoaded", () => {
   initializeBookingNavigation();
   initializeAttractionBooking();
-  guardBookingPage();
+  initializeBookingPage();
 });
