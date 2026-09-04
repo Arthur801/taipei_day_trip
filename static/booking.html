@@ -18,7 +18,7 @@
   </header>
 
   <main class="booking-main">
-    <h1 class="booking-greeting">您好，<span id="booking-member-name">Yakko</span>，待預訂的行程如下：</h1>
+    <h1 class="booking-greeting">您好，<span id="booking-member-name"></span>，待預訂的行程如下：</h1>
 
     <p class="booking-empty" id="booking-empty">目前沒有任何待預訂的行程</p>
 
@@ -45,11 +45,11 @@
           <h2 id="contact-title">您的聯絡資訊</h2>
           <div class="booking-form-row">
             <label for="contact-name">聯絡姓名：</label>
-            <input id="contact-name" name="name" type="text" value="Yakko" autocomplete="name" required>
+            <input id="contact-name" name="name" type="text" autocomplete="name" required>
           </div>
           <div class="booking-form-row">
             <label for="contact-email">連絡信箱：</label>
-            <input id="contact-email" name="email" type="email" value="wehelp@pada-x.com" autocomplete="email" required>
+            <input id="contact-email" name="email" type="email" autocomplete="email" required>
           </div>
           <div class="booking-form-row">
             <label for="contact-phone">手機號碼：</label>
@@ -131,5 +131,6 @@
   </section>
 
   <script src="/static/user_auth.js" defer></script>
+  <script src="/static/booking.js" defer></script>
 </body>
 </html>
