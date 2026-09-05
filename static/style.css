@@ -11,6 +11,8 @@
 
 * { box-sizing: border-box; }
 
+[hidden] { display: none !important; }
+
 html, body { margin: 0; min-width: 320px; }
 
 body {
@@ -76,11 +78,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 }
 
 .btn-for-navigation {
+  display: inline-block;
   padding: 8px 0;
   color: var(--text);
   background: transparent;
   border: 0;
   font-size: 16px;
+  text-decoration: none;
 }
 
 .btn-for-navigation:hover { color: var(--teal); }
@@ -374,6 +378,131 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .attraction-text-line { display: block; }
 .attraction-text-line + .attraction-text-line { margin-top: 1.5em; }
 
+/* Booking page */
+.booking-page-body { display: flex; min-height: 100vh; flex-direction: column; }
+.booking-page-body .navigation { flex: 0 0 54px; border-bottom: 1px solid var(--border); }
+.booking-main { width: 100%; flex: 0 0 auto; padding-top: 40px; }
+.booking-greeting {
+  width: min(1000px, calc(100% - 40px));
+  margin: 0 auto;
+  color: var(--text);
+  font-size: 19px;
+  line-height: 27px;
+}
+.booking-empty {
+  width: min(1000px, calc(100% - 40px));
+  margin: 28px auto 38px;
+  font-size: 16px;
+}
+.booking-page-body .footer { min-height: 104px; flex: 1 0 104px; align-content: start; padding-top: 40px; }
+.booking-content { margin-top: 28px; }
+.booking-trip {
+  position: relative;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 30px;
+  width: min(980px, calc(100% - 40px));
+  min-height: 240px;
+  margin: 0 auto;
+}
+.booking-trip-image { display: block; width: 250px; height: 200px; object-fit: cover; }
+.booking-trip-details h2 {
+  margin: 1px 45px 19px 0;
+  color: var(--teal);
+  font-size: 16px;
+  line-height: 24px;
+}
+.booking-trip-list { margin: 0; font-size: 16px; }
+.booking-trip-list div { display: flex; margin-bottom: 10px; }
+.booking-trip-list dt { flex: 0 0 auto; font-weight: 700; }
+.booking-trip-list dd { min-width: 0; margin: 0; }
+.booking-delete {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  padding: 3px;
+  color: var(--footer);
+  background: transparent;
+  border: 0;
+}
+.booking-delete:hover { color: var(--teal); }
+.booking-delete-icon {
+  position: absolute;
+  top: 9px;
+  left: 8px;
+  width: 14px;
+  height: 16px;
+  background: currentColor;
+  border-radius: 1px 1px 3px 3px;
+}
+.booking-delete-icon::before {
+  position: absolute;
+  top: -5px;
+  left: -2px;
+  width: 18px;
+  height: 3px;
+  background: currentColor;
+  border-radius: 2px;
+  content: "";
+}
+.booking-delete-icon::after {
+  position: absolute;
+  top: -8px;
+  left: 4px;
+  width: 6px;
+  height: 4px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 2px 2px 0 0;
+  content: "";
+}
+.booking-form-section {
+  width: min(1200px, calc(100% - 40px));
+  padding: 39px 0 40px;
+  margin: 0 auto;
+  border-top: 1px solid var(--border);
+}
+.booking-form-inner { width: min(980px, 100%); margin: 0 auto; }
+.booking-form-section h2 { margin: 0 0 18px; color: var(--text); font-size: 19px; line-height: 27px; }
+.booking-form-row { display: flex; align-items: center; min-height: 38px; margin-bottom: 15px; font-size: 16px; }
+.booking-form-row label { flex: 0 0 81px; }
+.booking-form-row input {
+  width: 200px;
+  height: 38px;
+  padding: 0 10px;
+  color: #000;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.booking-form-row input::placeholder { color: var(--footer); opacity: 1; }
+.booking-form-notice { margin: 15px 0 0; font-weight: 700; }
+.booking-payment { padding-top: 39px; padding-bottom: 39px; }
+.booking-payment .booking-form-row:last-child { margin-bottom: 0; }
+.booking-checkout {
+  display: flex;
+  width: min(1200px, calc(100% - 40px));
+  min-height: 176px;
+  padding: 39px 110px 56px;
+  margin: 0 auto;
+  align-items: flex-end;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+.booking-checkout p { margin: 0 0 20px; font-size: 16px; font-weight: 700; }
+.booking-checkout-button {
+  padding: 7px 20px;
+  color: #fff;
+  background: var(--teal);
+  border: 0;
+  border-radius: 5px;
+  font-size: 19px;
+  line-height: 27px;
+}
+.booking-checkout-button:hover { background: #337788; }
+
 @media (max-width: 1200px) {
   .attractions-group {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -408,6 +537,32 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .attractions-group { grid-template-columns: 1fr; gap: 15px; }
   .attraction-card img, .attractions-group > article > img, .attractions-group > a > img { height: 235px; }
   .footer { min-height: 104px; }
+  .booking-page-body .navigation-links { gap: 20px; }
+  .booking-main { padding-top: 40px; }
+  .booking-page-body.has-booking .booking-main { padding-top: 10px; }
+  .booking-greeting, .booking-empty { width: calc(100% - 20px); }
+  .booking-content { margin-top: 58px; }
+  .booking-trip {
+    display: block;
+    width: calc(100% - 20px);
+    min-height: 463px;
+  }
+  .booking-trip-image { width: 100%; height: 200px; }
+  .booking-trip-details { padding-top: 30px; }
+  .booking-trip-details h2 { margin: 0 0 20px; }
+  .booking-trip-list div { margin-bottom: 10px; }
+  .booking-delete { top: auto; right: 0; bottom: 31px; }
+  .booking-form-section { width: calc(100% - 20px); padding: 39px 0 40px; }
+  .booking-form-section h2 { margin-bottom: 18px; }
+  .booking-form-row { margin-bottom: 15px; }
+  .booking-form-notice { margin-top: 24px; }
+  .booking-payment { padding-bottom: 31px; }
+  .booking-checkout {
+    width: calc(100% - 20px);
+    min-height: 176px;
+    padding: 39px 0 57px;
+  }
+  .booking-page-body .footer { padding-top: 40px; }
 }
 
 @media (max-width: 749px) {

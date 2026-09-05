@@ -6,6 +6,9 @@ function initializeUserDialog() {
   const signupForm = document.querySelector("#signup-form");
   const signinMessage = document.querySelector("#signin-message");
   const signupMessage = document.querySelector("#signup-message");
+  const bookingMemberName = document.querySelector("#booking-member-name");
+  const contactName = document.querySelector("#contact-name");
+  const contactEmail = document.querySelector("#contact-email");
 
   if (
     !memberButton || !signinDialog || !signupDialog
@@ -36,6 +39,10 @@ function initializeUserDialog() {
     currentUser = user;
     window.currentUser = user;
     memberButton.textContent = user ? "登出系統" : "登入／註冊";
+
+    if (bookingMemberName) bookingMemberName.textContent = user?.name || "";
+    if (contactName) contactName.value = user?.name || "";
+    if (contactEmail) contactEmail.value = user?.email || "";
 
     if (user) {
       memberButton.removeAttribute("aria-haspopup");
