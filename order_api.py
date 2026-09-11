@@ -1,8 +1,10 @@
-import secrets
+import os
 from datetime import date as Date
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Annotated, Literal
+from zoneinfo import ZoneInfo
 
+import requests
 from fastapi import APIRouter, Body, Header
 from fastapi.responses import JSONResponse
 from mysql.connector import Error, IntegrityError
@@ -12,6 +14,10 @@ from attraction_api import get_database_connection
 from booking_api import get_authenticated_user_id, unauthorized_response
 
 router = APIRouter()
+TAPPAY_PARTNER_KEY = os.getenv("TAPPAY_PARTNER_KEY")
+TAPPAY_MERCHANT_ID = os.getenv("TAPPAY_MERCHANT_ID")
+TAPPAY_PAY_BY_PRIME_URL = "https://sandbox.tappaysdk.com/tpc/payment/pay-by-prime"
+TAPPAY_TIMEOUT_SECONDS = 30
 
 
 class ErrorResponse(BaseModel):
@@ -59,17 +65,79 @@ class CreateOrderRequest(BaseModel):
     order: OrderDetailsRequest
 
 
-class OrderNumberData(BaseModel):
+class PaymentResult(BaseModel):
+    status: Literal[0, 1]
+    message: str
+
+
+class OrderPaymentData(BaseModel):
     number: str
+    payment: PaymentResult
 
 
 class CreateOrderResponse(BaseModel):
-    data: OrderNumberData
+    data: OrderPaymentData
+
+
+class TapPayRequestError(Exception):
+    pass
 
 
 def generate_order_number() -> str:
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
-    return f"{timestamp}{secrets.token_hex(8).upper()}"
+    return datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y%m%d%H%M%S")
+
+
+def pay_by_prime(
+    prime: str,
+    order_number: str,
+    amount: int,
+    attraction_name: str,
+    contact_name: str,
+    contact_email: str,
+    contact_phone: str,
+) -> tuple[int, str]:
+    if not TAPPAY_PARTNER_KEY or not TAPPAY_MERCHANT_ID:
+        raise TapPayRequestError("TapPay backend credentials are not configured")
+
+    payload = {
+        "prime": prime,
+        "partner_key": TAPPAY_PARTNER_KEY,
+        "merchant_id": TAPPAY_MERCHANT_ID,
+        "details": attraction_name[:100],
+        "amount": amount,
+        "order_number": order_number,
+        "cardholder": {
+            "phone_number": contact_phone,
+            "name": contact_name,
+            "email": contact_email,
+        },
+        "remember": False,
+    }
+
+    try:
+        response = requests.post(
+            TAPPAY_PAY_BY_PRIME_URL,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": TAPPAY_PARTNER_KEY,
+            },
+            json=payload,
+            timeout=TAPPAY_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        result = response.json()
+    except (requests.RequestException, ValueError) as error:
+        raise TapPayRequestError("TapPay Pay by Prime request failed") from error
+
+    if not isinstance(result, dict):
+        raise TapPayRequestError("TapPay returned an invalid response")
+
+    status = result.get("status")
+    message = result.get("msg")
+    if not isinstance(status, int) or not isinstance(message, str):
+        raise TapPayRequestError("TapPay returned an invalid response")
+
+    return status, message
 
 
 def invalid_order_response(message: str = "訂單建立失敗，輸入資料不正確"):
@@ -122,8 +190,11 @@ def create_order(
         connection = get_database_connection()
         cursor = connection.cursor(dictionary=True)
         cursor.execute(
-            "SELECT attraction_id, date, time, price "
-            "FROM booking WHERE user_id = %s LIMIT 1 FOR UPDATE",
+            "SELECT b.attraction_id, b.date, b.time, b.price, "
+            "a.name AS attraction_name "
+            "FROM booking AS b "
+            "JOIN attractions AS a ON a.id = b.attraction_id "
+            "WHERE b.user_id = %s LIMIT 1 FOR UPDATE",
             (user_id,),
         )
         booking = cursor.fetchone()
@@ -146,26 +217,90 @@ def create_order(
             connection.rollback()
             return invalid_order_response("訂單內容與目前預定行程不相符")
 
-        order_number = generate_order_number()
         cursor.execute(
-            "INSERT INTO orders ("
-            "number, user_id, attraction_id, date, time, price, "
-            "contact_name, contact_email, contact_phone, status"
-            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'UNPAID')",
+            "SELECT id, number FROM orders "
+            "WHERE user_id = %s AND attraction_id = %s "
+            "AND date = %s AND time = %s AND price = %s "
+            "AND status = 'UNPAID' "
+            "ORDER BY id DESC LIMIT 1 FOR UPDATE",
             (
-                order_number,
                 user_id,
                 booking["attraction_id"],
                 booking_date,
                 booking["time"],
                 booking["price"],
-                contact_name,
-                contact_email,
-                contact_phone,
             ),
         )
+        unpaid_order = cursor.fetchone()
+
+        if unpaid_order is not None:
+            order_id = unpaid_order["id"]
+            order_number = unpaid_order["number"]
+        else:
+            order_number = generate_order_number()
+            cursor.execute(
+                "INSERT INTO orders ("
+                "number, user_id, attraction_id, date, time, price, "
+                "contact_name, contact_email, contact_phone, status"
+                ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'UNPAID')",
+                (
+                    order_number,
+                    user_id,
+                    booking["attraction_id"],
+                    booking_date,
+                    booking["time"],
+                    booking["price"],
+                    contact_name,
+                    contact_email,
+                    contact_phone,
+                ),
+            )
+            order_id = cursor.lastrowid
         connection.commit()
-        return {"data": {"number": order_number}}
+
+        try:
+            payment_status, payment_message = pay_by_prime(
+                prime=request.prime,
+                order_number=order_number,
+                amount=booking["price"],
+                attraction_name=booking["attraction_name"],
+                contact_name=contact_name,
+                contact_email=contact_email,
+                contact_phone=contact_phone,
+            )
+        except TapPayRequestError as error:
+            print(f"TapPay payment error: {error}")
+            payment_status = 1
+            payment_message = str(error)
+
+        if payment_status != 0:
+            print(
+                "TapPay payment declined: "
+                f"status={payment_status}, message={payment_message}"
+            )
+            return {
+                "data": {
+                    "number": order_number,
+                    "payment": {"status": 1, "message": "付款失敗"},
+                }
+            }
+
+        cursor.execute(
+            "UPDATE orders SET status = 'PAID', contact_name = %s, "
+            "contact_email = %s, contact_phone = %s "
+            "WHERE id = %s AND status = 'UNPAID'",
+            (contact_name, contact_email, contact_phone, order_id),
+        )
+        if cursor.rowcount != 1:
+            raise ValueError("Unable to mark paid order")
+        connection.commit()
+
+        return {
+            "data": {
+                "number": order_number,
+                "payment": {"status": 0, "message": "付款成功"},
+            }
+        }
     except IntegrityError as error:
         if connection is not None:
             connection.rollback()

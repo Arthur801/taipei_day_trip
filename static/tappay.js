@@ -138,7 +138,7 @@ async function handleTapPayPrime(prime) {
     return;
   }
 
-  setTapPayMessage("正在建立訂單...");
+  setTapPayMessage("正在建立訂單並處理付款...");
   const booking = await getCurrentBookingForOrder(token);
   if (!booking) return;
 
@@ -157,11 +157,27 @@ async function handleTapPayPrime(prime) {
   }
 
   const result = await response.json().catch(() => ({}));
-  if (!response.ok || !result.data?.number) {
-    throw orderSubmissionError(result.message || "訂單建立失敗，請稍後再試");
+  if (!response.ok) {
+    throw orderSubmissionError(result.message || "付款失敗，請稍後再試");
   }
 
-  setTapPayMessage(`訂單建立成功，訂單編號：${result.data.number}`, "success");
+  if (
+    !result.data?.number
+    || !Number.isInteger(result.data.payment?.status)
+    || typeof result.data.payment?.message !== "string"
+  ) {
+    throw orderSubmissionError("付款結果格式不正確，請稍後再試");
+  }
+
+  if (result.data.payment.status !== 0) {
+    setTapPayMessage(result.data.payment.message);
+    return null;
+  }
+
+  setTapPayMessage(
+    `${result.data.payment.message}，訂單編號：${result.data.number}`,
+    "success",
+  );
   return result.data.number;
 }
 
