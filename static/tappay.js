@@ -1,7 +1,7 @@
 const TAPPAY_CONFIG = Object.freeze({
   // Replace these values with the App ID and App Key from TapPay Portal.
-  appId: null,
-  appKey: "",
+  appId: 171130,
+  appKey: "app_5xekHY6s1VZX5v7Bs6et8eIqkTbD9NIhZigEzjXpAfDnchpIu3JXbpvXgLZx",
   serverType: "sandbox",
 });
 

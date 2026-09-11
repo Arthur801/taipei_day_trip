@@ -53,7 +53,7 @@ def create_database():
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS users (
-                id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                id BIGINT PRIMARY KEY AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL
@@ -65,11 +65,30 @@ def create_database():
             CREATE TABLE IF NOT EXISTS booking (
                 id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
                 date DATE NOT NULL,
-                user_id INT UNSIGNED NOT NULL,
+                user_id BIGINT NOT NULL,
                 time ENUM('morning', 'afternoon') NOT NULL,
                 price INT UNSIGNED NOT NULL,
                 attraction_id INT UNSIGNED NOT NULL,
                 UNIQUE KEY unique_booking_user (user_id),
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (attraction_id) REFERENCES attractions(id)
+            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+            """
+        )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS orders (
+                id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                number VARCHAR(50) NOT NULL UNIQUE,
+                user_id BIGINT NOT NULL,
+                attraction_id INT UNSIGNED NOT NULL,
+                date DATE NOT NULL,
+                time ENUM('morning', 'afternoon') NOT NULL,
+                price INT UNSIGNED NOT NULL,
+                contact_name VARCHAR(255) NOT NULL,
+                contact_email VARCHAR(255) NOT NULL,
+                contact_phone VARCHAR(30) NOT NULL,
+                status ENUM('UNPAID', 'PAID') NOT NULL DEFAULT 'UNPAID',
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (attraction_id) REFERENCES attractions(id)
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
