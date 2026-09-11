@@ -6,8 +6,8 @@ from attraction_api import router as attraction_router
 from attraction_category_api import router as attraction_category_router
 from booking_api import router as booking_router
 from mrt_station_api import router as mrt_router
-from user_api import router as user_router
 from order_api import router as order_router
+from user_api import router as user_router
 
 app=FastAPI()
 app.include_router(attraction_router)
