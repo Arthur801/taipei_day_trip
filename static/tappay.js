@@ -58,12 +58,111 @@ function validateContactFields(form) {
   return false;
 }
 
-function handleTapPayPrime(prime) {
+function getOrderAuthToken() {
+  try {
+    return localStorage.getItem("token");
+  } catch (error) {
+    console.error("Unable to read authentication token for order.", error);
+    return null;
+  }
+}
+
+function redirectAfterOrderAuthFailure() {
+  try {
+    localStorage.removeItem("token");
+  } catch (error) {
+    console.error("Unable to remove expired authentication token.", error);
+  }
+  window.location.replace("/");
+}
+
+function orderSubmissionError(message) {
+  const error = new Error("Unable to create order.");
+  error.userMessage = message;
+  return error;
+}
+
+async function getCurrentBookingForOrder(token) {
+  const response = await fetch("/api/booking", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (response.status === 403) {
+    redirectAfterOrderAuthFailure();
+    return null;
+  }
+
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw orderSubmissionError(result.message || "無法取得目前的預定行程");
+  }
+  if (!result.data) {
+    throw orderSubmissionError("目前沒有可建立訂單的預定行程");
+  }
+
+  return result.data;
+}
+
+function buildOrderPayload(prime, booking) {
+  return {
+    prime,
+    order: {
+      price: booking.price,
+      trip: {
+        attraction: {
+          id: booking.attraction.id,
+          name: booking.attraction.name,
+          address: booking.attraction.address,
+          image: booking.attraction.image,
+        },
+        date: booking.date,
+        time: booking.time,
+      },
+      contact: {
+        name: document.querySelector("#contact-name").value.trim(),
+        email: document.querySelector("#contact-email").value.trim(),
+        phone: document.querySelector("#contact-phone").value.trim(),
+      },
+    },
+  };
+}
+
+async function handleTapPayPrime(prime) {
   if (typeof prime !== "string" || prime.length === 0) {
     throw new Error("TapPay returned an empty prime.");
   }
 
-  setTapPayMessage("付款資訊驗證成功", "success");
+  const token = getOrderAuthToken();
+  if (!token) {
+    redirectAfterOrderAuthFailure();
+    return;
+  }
+
+  setTapPayMessage("正在建立訂單...");
+  const booking = await getCurrentBookingForOrder(token);
+  if (!booking) return;
+
+  const response = await fetch("/api/orders", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(buildOrderPayload(prime, booking)),
+  });
+
+  if (response.status === 403) {
+    redirectAfterOrderAuthFailure();
+    return;
+  }
+
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.data?.number) {
+    throw orderSubmissionError(result.message || "訂單建立失敗，請稍後再試");
+  }
+
+  setTapPayMessage(`訂單建立成功，訂單編號：${result.data.number}`, "success");
+  return result.data.number;
 }
 
 function initializeTapPay() {
@@ -167,7 +266,8 @@ function initializeTapPay() {
     setTapPayMessage("正在驗證付款資訊...");
 
     try {
-      window.TPDirect.card.getPrime((result) => {
+      window.TPDirect.card.getPrime(async (result) => {
+        let orderCreated = false;
         try {
           if (result.status !== 0 || !result.card?.prime) {
             const detail = result.msg ? `：${result.msg}` : "";
@@ -175,13 +275,13 @@ function initializeTapPay() {
             return;
           }
 
-          handleTapPayPrime(result.card.prime);
+          orderCreated = Boolean(await handleTapPayPrime(result.card.prime));
         } catch (error) {
-          console.error("Unable to handle TapPay prime.", error);
-          setTapPayMessage("付款資訊驗證失敗，請稍後再試");
+          console.error("Unable to submit order after getting TapPay prime.", error);
+          setTapPayMessage(error.userMessage || "訂單建立失敗，請稍後再試");
         } finally {
           isGettingPrime = false;
-          submitButton.disabled = false;
+          submitButton.disabled = orderCreated;
         }
       });
     } catch (error) {

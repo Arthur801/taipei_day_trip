@@ -1,6 +1,6 @@
+import secrets
 from datetime import date as Date
 from datetime import datetime, timezone
-import secrets
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Body, Header
