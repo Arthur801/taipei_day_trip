@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from mysql.connector import Error, IntegrityError
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, ValidationError
 
-from attraction_api import get_database_connection
+from attraction_api import get_database_connection, parse_images
 from booking_api import get_authenticated_user_id, unauthorized_response
 
 router = APIRouter()
@@ -79,6 +79,18 @@ class CreateOrderResponse(BaseModel):
     data: OrderPaymentData
 
 
+class OrderRecordData(BaseModel):
+    number: str
+    price: int
+    trip: TripRequest
+    contact: ContactRequest
+    status: Literal[0, 1]
+
+
+class GetOrderResponse(BaseModel):
+    data: OrderRecordData | None
+
+
 class TapPayRequestError(Exception):
     pass
 
@@ -145,6 +157,88 @@ def invalid_order_response(message: str = "訂單建立失敗，輸入資料不�
         status_code=400,
         content={"error": True, "message": message},
     )
+
+
+@router.get(
+    "/api/order/{orderNumber}",
+    response_model=GetOrderResponse,
+    responses={
+        403: {
+            "model": ErrorResponse,
+            "description": "未登入系統，拒絕存取",
+        },
+        500: {
+            "model": ErrorResponse,
+            "description": "伺服器內部錯誤",
+        },
+    },
+)
+def get_order(
+    orderNumber: str,
+    authorization: Annotated[str | None, Header()] = None,
+):
+    user_id = get_authenticated_user_id(authorization)
+    if user_id is None:
+        return unauthorized_response()
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_database_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT o.number, o.price, o.date, o.time, "
+            "o.contact_name, o.contact_email, o.contact_phone, o.status, "
+            "a.id AS attraction_id, a.name AS attraction_name, "
+            "a.address AS attraction_address, a.images AS attraction_images "
+            "FROM orders AS o "
+            "INNER JOIN attractions AS a ON a.id = o.attraction_id "
+            "WHERE o.number = %s AND o.user_id = %s LIMIT 1",
+            (orderNumber, user_id),
+        )
+        row = cursor.fetchone()
+
+        if row is None:
+            return {"data": None}
+
+        images = parse_images(row["attraction_images"])
+        order_date = row["date"]
+        if hasattr(order_date, "isoformat"):
+            order_date = order_date.isoformat()
+
+        return {
+            "data": {
+                "number": row["number"],
+                "price": row["price"],
+                "trip": {
+                    "attraction": {
+                        "id": row["attraction_id"],
+                        "name": row["attraction_name"],
+                        "address": row["attraction_address"],
+                        "image": images[0] if images else None,
+                    },
+                    "date": order_date,
+                    "time": row["time"],
+                },
+                "contact": {
+                    "name": row["contact_name"],
+                    "email": row["contact_email"],
+                    "phone": row["contact_phone"],
+                },
+                "status": 1 if row["status"] == "PAID" else 0,
+            }
+        }
+    except (Error, KeyError, TypeError, ValueError) as error:
+        print(f"get order API error: {error}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": True, "message": "伺服器內部錯誤"},
+        )
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if connection is not None and connection.is_connected():
+            connection.close()
 
 
 @router.post(

@@ -152,5 +152,88 @@ class OrderPaymentTests(unittest.TestCase):
         self.assertNotIn("bank_transaction_id", post.call_args.kwargs["json"])
 
 
+class GetOrderTests(unittest.TestCase):
+    def make_database(self, row):
+        cursor = Mock()
+        cursor.fetchone.return_value = row
+        connection = Mock()
+        connection.cursor.return_value = cursor
+        connection.is_connected.return_value = True
+        return connection, cursor
+
+    def test_returns_paid_order_owned_by_authenticated_user(self):
+        connection, cursor = self.make_database(
+            {
+                "number": "20210425121135",
+                "price": 2000,
+                "date": date(2022, 1, 31),
+                "time": "afternoon",
+                "contact_name": "彭彭彭",
+                "contact_email": "ply@ply.com",
+                "contact_phone": "0912345678",
+                "status": "PAID",
+                "attraction_id": 10,
+                "attraction_name": "平安鐘",
+                "attraction_address": "臺北市大安區忠孝東路 4 段",
+                "attraction_images": "/imgs/10.jpg/imgs/10-2.jpg",
+            }
+        )
+
+        with (
+            patch.object(order_api, "get_authenticated_user_id", return_value=7),
+            patch.object(order_api, "get_database_connection", return_value=connection),
+        ):
+            result = order_api.get_order("20210425121135", "Bearer token")
+
+        self.assertEqual(
+            result,
+            {
+                "data": {
+                    "number": "20210425121135",
+                    "price": 2000,
+                    "trip": {
+                        "attraction": {
+                            "id": 10,
+                            "name": "平安鐘",
+                            "address": "臺北市大安區忠孝東路 4 段",
+                            "image": "/imgs/10.jpg",
+                        },
+                        "date": "2022-01-31",
+                        "time": "afternoon",
+                    },
+                    "contact": {
+                        "name": "彭彭彭",
+                        "email": "ply@ply.com",
+                        "phone": "0912345678",
+                    },
+                    "status": 1,
+                }
+            },
+        )
+        cursor.execute.assert_called_once()
+        self.assertEqual(cursor.execute.call_args.args[1], ("20210425121135", 7))
+
+    def test_returns_null_when_order_does_not_belong_to_user(self):
+        connection, _ = self.make_database(None)
+
+        with (
+            patch.object(order_api, "get_authenticated_user_id", return_value=7),
+            patch.object(order_api, "get_database_connection", return_value=connection),
+        ):
+            result = order_api.get_order("20210425121135", "Bearer token")
+
+        self.assertEqual(result, {"data": None})
+
+    def test_rejects_unauthenticated_request_before_database_access(self):
+        with (
+            patch.object(order_api, "get_authenticated_user_id", return_value=None),
+            patch.object(order_api, "get_database_connection") as get_connection,
+        ):
+            response = order_api.get_order("20210425121135", None)
+
+        self.assertEqual(response.status_code, 403)
+        get_connection.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
