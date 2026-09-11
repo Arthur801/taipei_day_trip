@@ -178,6 +178,7 @@ async function handleTapPayPrime(prime) {
     `${result.data.payment.message}，訂單編號：${result.data.number}`,
     "success",
   );
+  window.location.assign(`/thankyou?number=${encodeURIComponent(result.data.number)}`);
   return result.data.number;
 }
 

@@ -519,6 +519,33 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .booking-checkout-button:hover { background: #337788; }
 .booking-checkout-button:disabled { cursor: not-allowed; opacity: .65; }
 
+/* Thank-you page */
+.thankyou-page-body {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  grid-template-rows: 54px minmax(0, 1fr) auto;
+}
+.thankyou-page-body .navigation { border-bottom: 1px solid var(--border); }
+.thankyou-main {
+  display: flex;
+  width: 100%;
+  min-height: 300px;
+  padding: 40px 20px;
+  align-items: center;
+  justify-content: center;
+}
+.thankyou-message { width: min(600px, 100%); text-align: center; }
+.thankyou-message h1 { margin: 0 0 12px; color: var(--dark-text); font-size: 24px; }
+.thankyou-message p { margin: 0; font-size: 19px; }
+.thankyou-order { margin-top: 28px; }
+.thankyou-order h2 { margin: 0 0 12px; color: var(--dark-text); font-size: 19px; }
+.thankyou-order-list { display: grid; gap: 6px; margin: 0; font-size: 16px; }
+.thankyou-order-list div { display: flex; justify-content: center; }
+.thankyou-order-list dt { flex: 0 0 auto; font-weight: 700; }
+.thankyou-order-list dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.thankyou-message .thankyou-order-message { margin-top: 20px; font-size: 16px; }
+
 @media (max-width: 1200px) {
   .attractions-group {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
