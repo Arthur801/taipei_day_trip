@@ -387,6 +387,17 @@ def create_order(
         )
         if cursor.rowcount != 1:
             raise ValueError("Unable to mark paid order")
+        cursor.execute(
+            "DELETE FROM booking WHERE user_id = %s AND attraction_id = %s "
+            "AND date = %s AND time = %s AND price = %s",
+            (
+                user_id,
+                booking["attraction_id"],
+                booking_date,
+                booking["time"],
+                booking["price"],
+            ),
+        )
         connection.commit()
 
         return {

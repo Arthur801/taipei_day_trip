@@ -59,6 +59,9 @@ class FakeCursor:
                     order["status"] = "PAID"
                     self.rowcount = 1
                     break
+        elif sql.startswith("DELETE FROM booking"):
+            self.state["booking"] = None
+            self.rowcount = 1
 
     def fetchone(self):
         return self.current_result
@@ -120,6 +123,7 @@ class OrderPaymentTests(unittest.TestCase):
             ),
         ):
             first = order_api.create_order(ORDER_REQUEST, "Bearer token")
+            self.assertIsNotNone(self.state["booking"])
             second = order_api.create_order(ORDER_REQUEST, "Bearer token")
 
         self.assertEqual(first["data"]["payment"]["status"], 1)
@@ -127,6 +131,7 @@ class OrderPaymentTests(unittest.TestCase):
         self.assertEqual(len(self.state["orders"]), 1)
         self.assertEqual(self.state["orders"][0]["number"], "20260912000001")
         self.assertEqual(self.state["orders"][0]["status"], "PAID")
+        self.assertIsNone(self.state["booking"])
 
     def test_pay_by_prime_does_not_reuse_bank_transaction_id(self):
         response = Mock()
