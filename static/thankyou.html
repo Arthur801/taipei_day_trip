@@ -1,11 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thank You</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <title>台北一日遊｜訂單完成</title>
 </head>
-<body>
-  
+<body class="thankyou-page-body">
+  <header class="navigation">
+    <nav class="navbar" aria-label="主要導覽">
+      <a class="logo" href="/" aria-label="台北一日遊首頁">台北一日遊</a>
+      <ul class="navigation-links">
+        <li><a class="btn-for-navigation" href="/booking">預定行程</a></li>
+        <li><button class="btn-for-navigation" id="member-button" type="button" aria-haspopup="dialog">登入／註冊</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="thankyou-main">
+    <div class="thankyou-message">
+      <h1>訂單已完成</h1>
+      <p>訂單編號：<span id="order-number"></span></p>
+      <section class="thankyou-order" id="order-details" aria-labelledby="order-details-title" hidden>
+        <h2 id="order-details-title">訂單資訊</h2>
+        <dl class="thankyou-order-list">
+          <div><dt>景點：</dt><dd id="order-attraction"></dd></div>
+          <div><dt>日期：</dt><dd id="order-date"></dd></div>
+          <div><dt>時間：</dt><dd id="order-time"></dd></div>
+          <div><dt>費用：</dt><dd id="order-price"></dd></div>
+          <div><dt>地點：</dt><dd id="order-address"></dd></div>
+          <div><dt>聯絡姓名：</dt><dd id="order-contact-name"></dd></div>
+          <div><dt>聯絡信箱：</dt><dd id="order-contact-email"></dd></div>
+          <div><dt>手機號碼：</dt><dd id="order-contact-phone"></dd></div>
+          <div><dt>付款狀態：</dt><dd id="order-status"></dd></div>
+        </dl>
+      </section>
+      <p class="thankyou-order-message" id="order-message" role="status" aria-live="polite"></p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-text">COPYRIGHT © 2021 台北一日遊</p>
+  </footer>
+
+  <section class="dialog dialog-signin" aria-hidden="true" aria-labelledby="signin-title">
+    <div class="backdrop"></div>
+    <div class="dialog-panel" role="dialog" aria-modal="true">
+      <div class="decorator-bar"></div>
+      <button class="dialog-close" id="signin-close" type="button" aria-label="關閉登入視窗"><img src="/static/images/icon_close.png" alt=""></button>
+      <div class="dialog-main">
+        <h2 class="signin-title" id="signin-title">登入會員帳號</h2>
+        <form class="dialog-form" id="signin-form">
+          <label class="sr-only" for="signin-email">電子信箱</label>
+          <input type="email" class="input-for-dialog" id="signin-email" name="email" placeholder="輸入電子信箱" autocomplete="email" required>
+          <label class="sr-only" for="signin-password">密碼</label>
+          <input type="password" class="input-for-dialog" id="signin-password" name="password" placeholder="輸入密碼" autocomplete="current-password" required>
+          <button class="button-for-dialog" id="signin-button" type="submit">登入帳戶</button>
+        </form>
+        <p class="dialog-message" id="signin-message" aria-live="polite" hidden></p>
+        <button class="dialog-switch signin-signup-text" type="button">還沒有帳戶？點此註冊</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="dialog dialog-signup" aria-hidden="true" aria-labelledby="signup-title">
+    <div class="backdrop"></div>
+    <div class="dialog-panel" role="dialog" aria-modal="true">
+      <div class="decorator-bar"></div>
+      <button class="dialog-close" id="signup-close" type="button" aria-label="關閉註冊視窗"><img src="/static/images/icon_close.png" alt=""></button>
+      <div class="dialog-main">
+        <h2 class="signin-title" id="signup-title">註冊會員帳號</h2>
+        <form class="dialog-form" id="signup-form">
+          <label class="sr-only" for="signup-name">姓名</label>
+          <input type="text" class="input-for-dialog" id="signup-name" name="name" placeholder="輸入姓名" autocomplete="name" required>
+          <label class="sr-only" for="signup-email">電子信箱</label>
+          <input type="email" class="input-for-dialog" id="signup-email" name="email" placeholder="輸入電子信箱" autocomplete="email" required>
+          <label class="sr-only" for="signup-password">密碼</label>
+          <input type="password" class="input-for-dialog" id="signup-password" name="password" placeholder="輸入密碼" autocomplete="new-password" required>
+          <button class="button-for-dialog" id="signup-button" type="submit">註冊新帳戶</button>
+        </form>
+        <p class="dialog-message" id="signup-message" aria-live="polite" hidden></p>
+        <button class="dialog-switch signup-signin-text" type="button">已經有帳戶了？點此登入</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="/static/user_auth.js" defer></script>
+  <script src="/static/thankyou.js" defer></script>
 </body>
 </html>

@@ -63,17 +63,18 @@
         <div class="booking-form-inner">
           <h2 id="payment-title">信用卡付款資訊</h2>
           <div class="booking-form-row">
-            <label for="card-number">卡片號碼：</label>
-            <input id="card-number" name="card-number" type="text" inputmode="numeric" placeholder="**** **** **** ****" autocomplete="cc-number">
+            <span class="booking-form-label" id="card-number-label">卡片號碼：</span>
+            <div class="tpfield" id="card-number" role="group" aria-labelledby="card-number-label" aria-invalid="false"></div>
           </div>
           <div class="booking-form-row">
-            <label for="card-expiration">過期時間：</label>
-            <input id="card-expiration" name="card-expiration" type="text" inputmode="numeric" placeholder="MM / YY" autocomplete="cc-exp">
+            <span class="booking-form-label" id="card-expiration-label">過期時間：</span>
+            <div class="tpfield" id="card-expiration-date" role="group" aria-labelledby="card-expiration-label" aria-invalid="false"></div>
           </div>
           <div class="booking-form-row">
-            <label for="card-cvv">驗證密碼：</label>
-            <input id="card-cvv" name="card-cvv" type="text" inputmode="numeric" placeholder="CVV" autocomplete="cc-csc">
+            <span class="booking-form-label" id="card-ccv-label">驗證密碼：</span>
+            <div class="tpfield" id="card-ccv" role="group" aria-labelledby="card-ccv-label" aria-invalid="false"></div>
           </div>
+          <p class="tappay-message" id="tappay-message" role="status" aria-live="polite" hidden></p>
         </div>
       </section>
 
@@ -132,5 +133,7 @@
 
   <script src="/static/user_auth.js" defer></script>
   <script src="/static/booking.js" defer></script>
+  <script src="https://js.tappaysdk.com/sdk/tpdirect/v5.14.0" defer></script>
+  <script src="/static/tappay.js" defer></script>
 </body>
 </html>

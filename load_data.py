@@ -3,6 +3,7 @@ load raw data from taipei-attractions.json and save to database
 """
 
 import json
+import re
 
 import mysql.connector
 from mysql.connector import Error
@@ -26,6 +27,31 @@ def load_json():
 def process_data(content: dict):
     attractionList = content["list"]
     return attractionList
+
+
+def get_integer_column_type(cursor, table_name: str) -> str:
+    cursor.execute(
+        "SELECT COLUMN_TYPE FROM information_schema.COLUMNS "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s "
+        "AND COLUMN_NAME = 'id'",
+        (table_name,),
+    )
+    row = cursor.fetchone()
+    if row is None:
+        raise ValueError(f"找不到 {table_name}.id 欄位")
+
+    column_type = str(row[0]).strip().lower()
+    match = re.fullmatch(
+        r"(tinyint|smallint|mediumint|int|bigint)(?:\(\d+\))?( unsigned)?",
+        column_type,
+    )
+    if match is None:
+        raise ValueError(f"{table_name}.id 不是支援的整數型別: {column_type}")
+
+    integer_type = match.group(1).upper()
+    if match.group(2):
+        integer_type += " UNSIGNED"
+    return integer_type
 
 # create database and tables
 def create_database():
@@ -53,29 +79,50 @@ def create_database():
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS users (
-                id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                id BIGINT PRIMARY KEY AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
             """
                 )
+        user_id_type = get_integer_column_type(cursor, "users")
+        attraction_id_type = get_integer_column_type(cursor, "attractions")
         cursor.execute(
-            """
+            f"""
             CREATE TABLE IF NOT EXISTS booking (
                 id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
                 date DATE NOT NULL,
-                user_id INT UNSIGNED NOT NULL,
+                user_id {user_id_type} NOT NULL,
                 time ENUM('morning', 'afternoon') NOT NULL,
                 price INT UNSIGNED NOT NULL,
-                attraction_id INT UNSIGNED NOT NULL,
+                attraction_id {attraction_id_type} NOT NULL,
                 UNIQUE KEY unique_booking_user (user_id),
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (attraction_id) REFERENCES attractions(id)
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
             """
         )
-    except Error as e:
+        cursor.execute(
+            f"""
+            CREATE TABLE IF NOT EXISTS orders (
+                id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                number VARCHAR(50) NOT NULL UNIQUE,
+                user_id {user_id_type} NOT NULL,
+                attraction_id {attraction_id_type} NOT NULL,
+                date DATE NOT NULL,
+                time ENUM('morning', 'afternoon') NOT NULL,
+                price INT UNSIGNED NOT NULL,
+                contact_name VARCHAR(255) NOT NULL,
+                contact_email VARCHAR(255) NOT NULL,
+                contact_phone VARCHAR(30) NOT NULL,
+                status ENUM('UNPAID', 'PAID') NOT NULL DEFAULT 'UNPAID',
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (attraction_id) REFERENCES attractions(id)
+            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+            """
+        )
+    except (Error, ValueError) as e:
         print(f"database creation error: {e}")
     finally:
         if cursor is not None:
