@@ -559,7 +559,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .member-tools p { margin: 0 0 20px; font-size: 16px; }
 .member-settings { padding-left: 60px; margin: 0 0 20px; font-size: 16px; }
 .member-settings li { padding-left: 0; }
-.member-host-url { display: block; margin-top: 8px; overflow-wrap: anywhere; }
+.member-settings li + li { margin-top: 12px; }
+.member-host-url, .member-token-value { display: block; margin-top: 8px; overflow-wrap: anywhere; }
+.member-tools .member-token-message { margin: 12px 0 0; color: #c33; }
 .member-logout { padding-top: 47px; }
 .member-status { flex: 1 0 auto; padding-top: 40px; }
 

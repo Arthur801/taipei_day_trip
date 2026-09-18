@@ -44,6 +44,15 @@ class TokenResponse(BaseModel):
     token: str
 
 
+class ApiTokenResponse(BaseModel):
+    ok: bool
+    token: str
+
+
+class ApiTokenErrorResponse(BaseModel):
+    error: bool
+
+
 class UserData(BaseModel):
     id: int
     name: str
@@ -107,6 +116,58 @@ def decode_access_token(token: str) -> dict:
         algorithms=[JWT_ALGORITHM],
         options={"require": ["id", "name", "email", "exp"]},
     )
+
+
+@router.put(
+    "/api/token",
+    response_model=ApiTokenResponse,
+    responses={
+        403: {"model": ApiTokenErrorResponse, "description": "未登入系統，拒絕存取"},
+        500: {"model": ApiTokenErrorResponse, "description": "伺服器內部錯誤"},
+    },
+)
+def update_api_token(authorization: Annotated[str | None, Header()] = None):
+    scheme, separator, access_token = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer" or not separator or not access_token:
+        return JSONResponse(status_code=403, content={"error": True})
+
+    try:
+        user_id = decode_access_token(access_token)["id"]
+        if isinstance(user_id, bool) or not isinstance(user_id, int) or user_id < 1:
+            return JSONResponse(status_code=403, content={"error": True})
+    except (jwt.InvalidTokenError, KeyError, TypeError):
+        return JSONResponse(status_code=403, content={"error": True})
+
+    connection = None
+    cursor = None
+    try:
+        api_token = hashlib.sha256(
+            f"{user_id}:{secrets.token_hex(32)}".encode("utf-8")
+        ).hexdigest()
+        connection = get_database_connection()
+        cursor = connection.cursor()
+        cursor.execute(
+            "UPDATE users SET api_token = %s WHERE id = %s",
+            (api_token, user_id),
+        )
+        if cursor.rowcount != 1:
+            connection.rollback()
+            return JSONResponse(status_code=403, content={"error": True})
+        connection.commit()
+        return JSONResponse(
+            content={"ok": True, "token": api_token},
+            headers={"Cache-Control": "no-store"},
+        )
+    except Error as error:
+        if connection is not None:
+            connection.rollback()
+        print(f"api token update error: {error}")
+        return JSONResponse(status_code=500, content={"error": True})
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if connection is not None and connection.is_connected():
+            connection.close()
 
 
 @router.post(

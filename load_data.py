@@ -82,10 +82,18 @@ def create_database():
                 id BIGINT PRIMARY KEY AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL
+                password VARCHAR(255) NOT NULL,
+                api_token CHAR(64) NULL UNIQUE
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
             """
                 )
+        cursor.execute(
+            "SELECT 1 FROM information_schema.COLUMNS "
+            "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' "
+            "AND COLUMN_NAME = 'api_token'"
+        )
+        if cursor.fetchone() is None:
+            cursor.execute("ALTER TABLE users ADD COLUMN api_token CHAR(64) NULL UNIQUE")
         user_id_type = get_integer_column_type(cursor, "users")
         attraction_id_type = get_integer_column_type(cursor, "attractions")
         cursor.execute(

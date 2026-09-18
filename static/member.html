@@ -27,8 +27,10 @@
         <p>MCP 伺服器設定：</p>
         <ul class="member-settings">
           <li>Host URL<span class="member-host-url" id="member-host-url"></span></li>
+          <li id="member-bearer-token">Bearer Token</li>
         </ul>
-        <button class="booking-checkout-button" type="button">產生／更新金鑰</button>
+        <button class="booking-checkout-button" id="member-token-button" type="button">產生／更新金鑰</button>
+        <p class="member-token-message" id="member-token-message" role="alert" hidden></p>
       </div>
     </section>
     <section class="member-logout" aria-label="會員操作">

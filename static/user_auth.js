@@ -11,6 +11,9 @@ function initializeUserDialog() {
   const memberMain = document.querySelector("#member-main");
   const memberStatus = document.querySelector("#member-status");
   const memberHostUrl = document.querySelector("#member-host-url");
+  const memberBearerToken = document.querySelector("#member-bearer-token");
+  const memberTokenButton = document.querySelector("#member-token-button");
+  const memberTokenMessage = document.querySelector("#member-token-message");
   const memberLogoutButton = document.querySelector("#member-logout-button");
   const contactName = document.querySelector("#contact-name");
   const contactEmail = document.querySelector("#contact-email");
@@ -147,6 +150,49 @@ function initializeUserDialog() {
     memberLogoutButton.addEventListener("click", () => {
       removeStoredToken();
       window.location.replace("/");
+    });
+  }
+
+  if (memberBearerToken && memberTokenButton && memberTokenMessage) {
+    memberTokenButton.addEventListener("click", async () => {
+      const token = getStoredToken();
+      if (!token) {
+        window.location.replace("/");
+        return;
+      }
+
+      memberTokenButton.disabled = true;
+      memberTokenMessage.textContent = "";
+      memberTokenMessage.hidden = true;
+      try {
+        const response = await fetch("/api/token", {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.status === 403) {
+          removeStoredToken();
+          window.location.replace("/");
+          return;
+        }
+        const data = await response.json();
+        if (!response.ok || data.ok !== true || typeof data.token !== "string") {
+          throw new Error(`Unable to update API token: ${response.status}`);
+        }
+
+        let tokenValue = memberBearerToken.querySelector(".member-token-value");
+        if (!tokenValue) {
+          tokenValue = document.createElement("span");
+          tokenValue.className = "member-token-value";
+          memberBearerToken.append(tokenValue);
+        }
+        tokenValue.textContent = data.token;
+      } catch (error) {
+        console.error("Unable to update API token.", error);
+        memberTokenMessage.textContent = "金鑰產生失敗，請稍後再試";
+        memberTokenMessage.hidden = false;
+      } finally {
+        memberTokenButton.disabled = false;
+      }
     });
   }
 
