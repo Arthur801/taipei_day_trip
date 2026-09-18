@@ -546,6 +546,23 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .thankyou-order-list dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .thankyou-message .thankyou-order-message { margin-top: 20px; font-size: 16px; }
 
+/* Member page */
+.member-page-body { display: flex; min-height: 100vh; flex-direction: column; }
+.member-page-body .navigation { flex: 0 0 54px; border-bottom: 1px solid var(--border); }
+.member-page-body .footer { margin-top: auto; }
+.member-main, .member-status { width: min(1200px, calc(100% - 30px)); margin: 0 auto; }
+.member-main { flex: 1 0 auto; padding-bottom: 48px; }
+.member-greeting-section { padding: 40px 0 48px; border-bottom: 1px solid var(--border); }
+.member-greeting-section .booking-greeting { width: min(980px, 100%); }
+.member-tools { padding: 40px 0 48px; border-bottom: 1px solid var(--border); }
+.member-tools h2 { margin: 0 0 20px; font-size: 19px; line-height: 27px; }
+.member-tools p { margin: 0 0 20px; font-size: 16px; }
+.member-settings { padding-left: 60px; margin: 0 0 20px; font-size: 16px; }
+.member-settings li { padding-left: 0; }
+.member-host-url { display: block; margin-top: 8px; overflow-wrap: anywhere; }
+.member-logout { padding-top: 47px; }
+.member-status { flex: 1 0 auto; padding-top: 40px; }
+
 @media (max-width: 1200px) {
   .attractions-group {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -607,6 +624,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
     padding: 39px 0 57px;
   }
   .booking-page-body .footer { padding-top: 40px; }
+  .member-settings { padding-left: 40px; }
 }
 
 @media (max-width: 749px) {

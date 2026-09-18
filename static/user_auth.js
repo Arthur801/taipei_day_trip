@@ -7,6 +7,11 @@ function initializeUserDialog() {
   const signinMessage = document.querySelector("#signin-message");
   const signupMessage = document.querySelector("#signup-message");
   const bookingMemberName = document.querySelector("#booking-member-name");
+  const memberName = document.querySelector("#member-name");
+  const memberMain = document.querySelector("#member-main");
+  const memberStatus = document.querySelector("#member-status");
+  const memberHostUrl = document.querySelector("#member-host-url");
+  const memberLogoutButton = document.querySelector("#member-logout-button");
   const contactName = document.querySelector("#contact-name");
   const contactEmail = document.querySelector("#contact-email");
 
@@ -17,6 +22,7 @@ function initializeUserDialog() {
 
   const dialogs = [signinDialog, signupDialog];
   let currentUser = null;
+  let isCheckingUser = true;
 
   function getStoredToken() {
     try {
@@ -38,18 +44,19 @@ function initializeUserDialog() {
   function renderUserStatus(user) {
     currentUser = user;
     window.currentUser = user;
-    memberButton.textContent = user ? "登出系統" : "登入／註冊";
+    memberButton.textContent = user ? "會員中心" : "登入／註冊";
 
     if (bookingMemberName) bookingMemberName.textContent = user?.name || "";
+    if (memberName) memberName.textContent = user?.name || "";
     if (contactName) contactName.value = user?.name || "";
     if (contactEmail) contactEmail.value = user?.email || "";
 
     if (user) {
       memberButton.removeAttribute("aria-haspopup");
-      memberButton.setAttribute("aria-label", "登出目前帳號");
+      if (memberMain) memberButton.setAttribute("aria-current", "page");
     } else {
       memberButton.setAttribute("aria-haspopup", "dialog");
-      memberButton.removeAttribute("aria-label");
+      memberButton.removeAttribute("aria-current");
     }
   }
 
@@ -63,14 +70,27 @@ function initializeUserDialog() {
       if (!response.ok) throw new Error(`Unable to check user status: ${response.status}`);
 
       const { data } = await response.json();
-      if (data === null) removeStoredToken();
+      if (!data) removeStoredToken();
       renderUserStatus(data);
-      return data !== null;
+      if (memberMain) {
+        if (!data) {
+          window.location.replace("/");
+          return false;
+        }
+        memberHostUrl.textContent = new URL("/mcp/", window.location.origin).href;
+        memberMain.hidden = false;
+      }
+      return Boolean(data);
     } catch (error) {
       console.error("Unable to check user status.", error);
       renderUserStatus(null);
+      if (memberStatus) {
+        memberStatus.textContent = "無法確認登入狀態，請重新整理頁面";
+        memberStatus.hidden = false;
+      }
       return false;
     } finally {
+      isCheckingUser = false;
       memberButton.disabled = false;
     }
   }
@@ -115,14 +135,20 @@ function initializeUserDialog() {
   }
 
   memberButton.addEventListener("click", () => {
+    if (isCheckingUser) return;
     if (currentUser) {
-      removeStoredToken();
-      window.location.reload();
+      window.location.assign("/member");
       return;
     }
-
     openDialog(signinDialog, signinForm.elements.email);
   });
+
+  if (memberLogoutButton) {
+    memberLogoutButton.addEventListener("click", () => {
+      removeStoredToken();
+      window.location.replace("/");
+    });
+  }
 
   signinDialog.querySelector(".dialog-switch").addEventListener("click", () => {
     openDialog(signupDialog, signupForm.elements.name);
