@@ -8,14 +8,16 @@ from booking_api import router as booking_router
 from mrt_station_api import router as mrt_router
 from order_api import router as order_router
 from user_api import router as user_router
+from mcp_server import mcp_app
 
-app=FastAPI()
+app=FastAPI(lifespan=mcp_app.lifespan)
 app.include_router(attraction_router)
 app.include_router(attraction_category_router)
 app.include_router(mrt_router)
 app.include_router(user_router)
 app.include_router(booking_router)
 app.include_router(order_router)
+app.mount("/mcp", mcp_app)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Static Pages (Never Modify Code in this Block)
