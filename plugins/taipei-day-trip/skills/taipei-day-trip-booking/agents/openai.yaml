@@ -1,0 +1,4 @@
+interface:
+  display_name: "Taipei Day Trip Booking Skill"
+  short_description: "Search Taipei attractions and create guided tour bookings"
+  default_prompt: "Use $taipei-day-trip-booking to find a Taipei attraction and create a guided tour booking."

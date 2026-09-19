@@ -1,0 +1,24 @@
+{
+  "name": "taipei-day-trip",
+  "version": "0.1.0",
+  "description": "Search Taipei attractions and create guided tour bookings with the Taipei Day Trip MCP server.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Taipei Day Trip Booking",
+    "shortDescription": "Search Taipei attractions and create guided tour bookings.",
+    "longDescription": "Search Taipei attractions, normalize booking details from natural language, and create a guided tour booking through the Taipei Day Trip MCP server.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Find a Taipei attraction and help me book a guided tour."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}
