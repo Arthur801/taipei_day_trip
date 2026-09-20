@@ -15,6 +15,9 @@ from user_api import decode_access_token
 
 router = APIRouter()
 
+BookingTime = Literal["morning", "afternoon"]
+BookingPrice = Literal[2000, 2500]
+
 
 class ErrorResponse(BaseModel):
     error: bool
@@ -30,8 +33,65 @@ class BookingRequest(BaseModel):
 
     attraction_id: int = Field(alias="attractionId", gt=0)
     date: Date
-    time: Literal["morning", "afternoon"]
-    price: int = Field(gt=0)
+    time: BookingTime
+    price: BookingPrice
+
+
+class BookingValidationError(Exception):
+    pass
+
+
+class BookingStorageError(Exception):
+    pass
+
+
+def replace_booking(user_id: int, booking: BookingRequest) -> None:
+    expected_price = 2000 if booking.time == "morning" else 2500
+    if booking.price != expected_price:
+        raise BookingValidationError("建立失敗，時段與費用不相符")
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_database_connection()
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT id FROM attractions WHERE id = %s",
+            (booking.attraction_id,),
+        )
+        if cursor.fetchone() is None:
+            raise BookingValidationError("建立失敗，景點不存在")
+
+        cursor.execute("DELETE FROM booking WHERE user_id = %s", (user_id,))
+        cursor.execute(
+            "INSERT INTO booking (user_id, attraction_id, date, time, price) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (
+                user_id,
+                booking.attraction_id,
+                booking.date,
+                booking.time,
+                booking.price,
+            ),
+        )
+        connection.commit()
+    except BookingValidationError:
+        if connection is not None:
+            connection.rollback()
+        raise
+    except IntegrityError as error:
+        if connection is not None:
+            connection.rollback()
+        raise BookingValidationError("建立失敗，輸入資料不正確") from error
+    except Error as error:
+        if connection is not None:
+            connection.rollback()
+        raise BookingStorageError("伺服器內部錯誤") from error
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if connection is not None and connection.is_connected():
+            connection.close()
 
 
 def get_authenticated_user_id(authorization: str | None) -> int | None:
@@ -194,63 +254,21 @@ def create_new_booking(
             content={"error": True, "message": "建立失敗，輸入資料不正確"},
         )
 
-    expected_price = 2000 if booking.time == "morning" else 2500
-    if booking.price != expected_price:
-        return JSONResponse(
-            status_code=400,
-            content={"error": True, "message": "建立失敗，時段與費用不相符"},
-        )
-
-    connection = None
-    cursor = None
     try:
-        connection = get_database_connection()
-        cursor = connection.cursor()
-        cursor.execute(
-            "SELECT id FROM attractions WHERE id = %s",
-            (booking.attraction_id,),
-        )
-        if cursor.fetchone() is None:
-            return JSONResponse(
-                status_code=400,
-                content={"error": True, "message": "建立失敗，景點不存在"},
-            )
-
-        cursor.execute("DELETE FROM booking WHERE user_id = %s", (user_id,))
-        cursor.execute(
-            "INSERT INTO booking (user_id, attraction_id, date, time, price) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            (
-                user_id,
-                booking.attraction_id,
-                booking.date,
-                booking.time,
-                booking.price,
-            ),
-        )
-        connection.commit()
+        replace_booking(user_id, booking)
         return {"ok": True}
-    except IntegrityError as error:
-        if connection is not None:
-            connection.rollback()
+    except BookingValidationError as error:
         print(f"create booking integrity error: {error}")
         return JSONResponse(
             status_code=400,
-            content={"error": True, "message": "建立失敗，輸入資料不正確"},
+            content={"error": True, "message": str(error)},
         )
-    except Error as error:
-        if connection is not None:
-            connection.rollback()
+    except BookingStorageError as error:
         print(f"create booking API error: {error}")
         return JSONResponse(
             status_code=500,
             content={"error": True, "message": "伺服器內部錯誤"},
         )
-    finally:
-        if cursor is not None:
-            cursor.close()
-        if connection is not None and connection.is_connected():
-            connection.close()
 
 
 @router.delete(
